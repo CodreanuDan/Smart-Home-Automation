@@ -86,7 +86,17 @@ RPI_ESP1_TOPIC_TEMP_CONTROL     = 'RaspPi/esp32/no.1/temperatureControl'
 #_______________________________________________________MAIN_FUNCTION___________________________________________________________#
 
 class mqtt_topic_subscribe():                   # Class that realises the connection to MQTT Topics. Inside each block are implemented functionalities based for each topic apart.
+    
+    """
 
+    Function topic_subscribe(self,client,rc): is a function that subscribe to specific MQTT topics and then 
+    takes the specific steps to read the data from the json and make connection between topics from the ESP 
+    or Node Red Dasboard or diretly from the server script to either ESP or Node Red Dashboard
+                                Server Script -> Topic -> Dashboard
+                          ESP -> Topic -> Server Script -> Topic -> Dashboard
+                          Dashboard -> Topic -> Server Script -> Topic -> ESP
+
+    """
     def topic_subscribe(self,client,rc):        # The self parameter represents the instance of the class.
 
 #_______________________________________________________________________________________________________________________________#
@@ -109,6 +119,18 @@ class mqtt_topic_subscribe():                   # Class that realises the connec
 
                 connectionReturnCodes = mqtt_dictionary.mqtt_dictionary()
                 print(f" <!> [mqtt_topic_connect][rpiStatus]   Failed to subscribe to topic: {MQTT_TOPIC}, rc: {rc} - {connectionReturnCodes[rc]}.    ") 
+        except TimeoutError :
+            print(f" <!> [mqtt_topic_connect][rpiStatus] --> TimeoutError <!>")
+            pass
+
+        except BlockingIOError:
+            print(f" <!> [mqtt_topic_connect][rpiStatus] --> BlockingIOError  <!>")
+            pass
+
+        except None as e:
+            print(f" <!> [mqtt_topic_connect][rpiStatus] Passed on None type error <!>")
+            pass
+
         except Exception as e:
             MQTT_TOPIC = MQTT_TOPIC_CHECK_STATUS
             print(f" <!> [mqtt_topic_connect][rpiStatus]   Failed to subscribe to topic: {MQTT_TOPIC, MQTT_TOPIC_SEND}. {e}   ") 
@@ -132,6 +154,18 @@ class mqtt_topic_subscribe():                   # Class that realises the connec
 
                 connectionReturnCodes = mqtt_dictionary.mqtt_dictionary()
                 print(f" <!> [mqtt_topic_connect][wifi]   Failed to subscribe to topic: {MQTT_TOPIC}, rc: {rc} - {connectionReturnCodes[rc]}.    ") 
+        except TimeoutError :
+            print(f" <!> [mqtt_topic_connect][wifi] --> TimeoutError <!>")
+            pass
+
+        except BlockingIOError:
+            print(f" <!> [mqtt_topic_connect][wifi] --> BlockingIOError  <!>")
+            pass
+
+        except None as e:
+            print(f" <!> [mqtt_topic_connect][wifi] Passed on None type error <!>")
+            pass
+
         except Exception as e:
             MQTT_TOPIC = MQTT_TOPIC_WIFI 
             print(f" <!> [mqtt_topic_connect][wifi]   Failed to subscribe to topic: {MQTT_TOPIC}. {e}   ") 
@@ -153,10 +187,23 @@ class mqtt_topic_subscribe():                   # Class that realises the connec
             else:
 
                 connectionReturnCodes = mqtt_dictionary.mqtt_dictionary()
-                print(f" <!> [mqtt_topic_connect][rpiTime]   Failed to subscribe to topic: {MQTT_TOPIC}, rc: {rc} - {connectionReturnCodes[rc]}.    ") 
+                print(f" <!> [mqtt_topic_connect][rpiTime]   Failed to subscribe to topic: {MQTT_TOPIC}, rc: {rc} - {connectionReturnCodes[rc]}.    ")
+
+        except TimeoutError :
+            print(f" <!> [mqtt_topic_connect][rpiTime] --> TimeoutError <!>")
+            pass
+
+        except BlockingIOError:
+            print(f" <!> [mqtt_topic_connect][rpiTime] --> BlockingIOError  <!>")
+            pass
+
+        except None as e:
+            print(f" <!> [mqtt_topic_connect][rpiTime] Passed on None type error <!>")
+            pass
+ 
         except Exception as e:
             MQTT_TOPIC = MQTT_TOPIC_TIME 
-            print(f" <!> [mqtt_topic_connect][rpiTime]   Failed to subscribe to topic: {MQTT_TOPIC}. {e}   ") 
+            print(f" <!> [mqtt_topic_connect][rpiTime]]   Failed to subscribe to topic: {MQTT_TOPIC}. {e}   ") 
 #_______________________________________________________________________________________________________________________________#
             
         # ESP1_TOPIC_TEMPERATURE                *ESP -> Topic -> Server Script -> Topic -> Dashboard
@@ -176,7 +223,7 @@ class mqtt_topic_subscribe():                   # Class that realises the connec
                         with open("esp_received_msg.json", "r") as json_file_roomTemp:
                             data = json.load(json_file_roomTemp)
                             v_roomTemperatureValue = data["esp32/no.1/roomTemp"]
-                            print(print(f" <OK> [mqtt_topic_connect][roomTemp]   Opened the JSON.     "))
+                            print(f" <OK> [mqtt_topic_connect][roomTemp]   Opened the JSON.     ")
                     except Exception as e:
                         print(f" <!> [mqtt_topic_connect][roomTemp]  Failed to open the JSON.  {e}   ")
 
@@ -189,7 +236,20 @@ class mqtt_topic_subscribe():                   # Class that realises the connec
 
             else:
                 connectionReturnCodes = mqtt_dictionary.mqtt_dictionary()
-                print(f" <!> [mqtt_topic_connect][roomTemp]   Failed to subscribe to topics: {MQTT_TOPIC, MQTT_TOPIC_SEND}. {e}   ") 
+                print(f" <!> [mqtt_topic_connect][roomTemp]   Failed to subscribe to topics: {MQTT_TOPIC, MQTT_TOPIC_SEND}. {e}   ")
+
+        except TimeoutError :
+            print(f" <!> [mqtt_topic_connect][roomTemp] --> TimeoutError <!>")
+            pass
+
+        except BlockingIOError:
+            print(f" <!> [mqtt_topic_connect][roomTemp] --> BlockingIOError  <!>")
+            pass
+
+        except None as e:
+            print(f" <!> [mqtt_topic_connect][roomTemp] Passed on None type error <!>")
+            pass
+  
         except Exception as e:
             MQTT_TOPIC          = ESP1_TOPIC_TEMPERATURE
             MQTT_TOPIC_SEND     = RPI_ESP1_TOPIC_TEMPERATURE
@@ -226,6 +286,19 @@ class mqtt_topic_subscribe():                   # Class that realises the connec
             else:
                 connectionReturnCodes = mqtt_dictionary.mqtt_dictionary()
                 print(f" <!> [mqtt_topic_connect][airHum]   Failed to subscribe to topics: {MQTT_TOPIC, MQTT_TOPIC_SEND}.     ") 
+        
+        except TimeoutError :
+            print(f" <!> [mqtt_topic_connect][airHum] --> TimeoutError <!>")
+            pass
+
+        except BlockingIOError:
+            print(f" <!> [mqtt_topic_connect][airHum] --> BlockingIOError  <!>")
+            pass
+
+        except None as e:
+            print(f" <!> [mqtt_topic_connect][airHum] Passed on None type error <!>")
+            pass
+
         except Exception as e:
             MQTT_TOPIC          = ESP1_TOPIC_AIR_HUMIDITY
             MQTT_TOPIC_SEND     = RPI_ESP1_TOPIC_AIR_HUMIDITY
@@ -335,7 +408,20 @@ class mqtt_topic_subscribe():                   # Class that realises the connec
         
             else:
                 connectionReturnCodes = mqtt_dictionary.mqtt_dictionary()
-                print(f" <!> [mqtt_topic_connect][sysState]   Failed to subscribe to topics: {MQTT_TOPIC, MQTT_TOPIC_SEND}, rc: {rc} - {connectionReturnCodes[rc]}.    ") 
+                print(f" <!> [mqtt_topic_connect][sysState]   Failed to subscribe to topics: {MQTT_TOPIC, MQTT_TOPIC_SEND}, rc: {rc} - {connectionReturnCodes[rc]}.    ")
+
+        except TimeoutError :
+            print(f" <!> [mqtt_topic_connect][sysState] --> TimeoutError <!>")
+            pass
+
+        except BlockingIOError:
+            print(f" <!> [mqtt_topic_connect][sysState] --> BlockingIOError  <!>")
+            pass
+
+        except None as e:
+            print(f" <!> [mqtt_topic_connect][sysState] Passed on None type error <!>")
+            pass
+ 
         except Exception as e:
             MQTT_TOPIC          = ESP1_TOPIC_SYS_STATE
             MQTT_TOPIC_SEND     = RPI_ESP1_TOPIC_SYS_STATE
@@ -374,6 +460,19 @@ class mqtt_topic_subscribe():                   # Class that realises the connec
             else:
                 connectionReturnCodes = mqtt_dictionary.mqtt_dictionary()
                 print(f" <!> [mqtt_topic_connect][tempCtrl]   Failed to subscribe to topics: {MQTT_TOPIC, MQTT_TOPIC_SEND}, rc: {rc} - {connectionReturnCodes[rc]}.    ") 
+
+        except TimeoutError :
+            print(f" <!> [mqtt_topic_connect][tempCtrl] --> TimeoutError <!>")
+            pass
+
+        except BlockingIOError:
+            print(f" <!> [mqtt_topic_connect][tempCtrl]--> BlockingIOError  <!>")
+            pass
+
+        except None as e:
+            print(f" <!> [mqtt_topic_connect][tempCtrl] Passed on None type error <!>")
+            pass
+
         except Exception as e:
             MQTT_TOPIC      = ESP1_TOPIC_TEMP_CONTROL
             MQTT_TOPIC_SEND = RPI_ESP1_TOPIC_TEMP_CONTROL

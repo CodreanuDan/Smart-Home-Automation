@@ -15,6 +15,8 @@
 #_____________________________________________________IMPORT_LIBRARIES__________________________________________________________#
 import paho.mqtt.client as mqtt
 import time
+import threading
+
 
 #_______________________________________________________________________________________________________________________________#
 #______________________________________________________IMPORT MODULES___________________________________________________________#
@@ -25,52 +27,111 @@ from mqtt_dictionary import mqtt_dictionary             # Module that stores the
 
 #_______________________________________________________________________________________________________________________________#
 #_____________________________________________________GLOBAL_VARIABLES__________________________________________________________#
-MQTT_BROKER = '169.254.175.150'
-MQTT_PORT = 1883
-
-mqtt.Client.connected_flag=False    # Create flag in class to verify connection to MQTT Broker.
 
 #_______________________________________________________________________________________________________________________________#
 #_______________________________________________________MAIN_FUNCTION___________________________________________________________#
 
 class mqtt_connect():
 
-   
-    print(" <OK> [mqtt_server][MAIN]  Connection to MQTT Broker ",MQTT_BROKER)
-    try:
+    MQTT_BROKER = '169.254.175.150'
+    print(" <OK> [mqtt_server][MAIN]  Connection to MQTT Broker ", MQTT_BROKER)
 
-        client = mqtt.Client()
-        client.on_connect = mqtt_on_connect.on_connect
-        client.on_message = mqtt_on_message.on_message
+    mqtt.Client._thread = threading.current_thread()
 
-        while True:
+    #####################################################################################################################################
+    #|                                       ESTABLISH CONNECTION & START CLIENT LOOP FUNCTION                                         |#
+    #####################################################################################################################################
+    def mqtt_server_connection():
 
-            client.loop_start()
-            client.connect(MQTT_BROKER,MQTT_PORT)
-            
-            print(f" <OK> [mqtt_server][MAIN]  Connecting to MQTT Broker")
-            while not client.connected_flag:                                # Wait in loop until connection succsessfull.
-                print(" <!> [mqtt_server]   In wait loop ")
-            print(" <OK> [mqtt_server][MAIN]   In Main Loop ")
+        try:           
+            ######################################################################################################################
+            #|                               FLAGS,VARS AND FUNCTIONS BINDED TO THE CLIENT                                      |#
+            ######################################################################################################################
 
+            client = mqtt.Client()                                   # Create an object to handle teh MQTT Client
+            client.on_connect = mqtt_on_connect.on_connect           # What the client will do when connection is aknowleged (CONNAK)
+            client.on_message = mqtt_on_message.on_message           # What the client will do when a message is received 
 
-            time.sleep(2)
-            print('\n')
+            client.connected_flag = False                            # Create flag to verify connection to MQTT Broker.
 
+            ######################################################################################################################
+            #|                                    ESTABLISH CONNECTION & START CLIENT LOOP                                      |#
+            ######################################################################################################################
+            while True:
+                try:
+                    MQTT_BROKER = '169.254.175.150'                                 # IP Adrress of the MQTT BROKER
+                    MQTT_PORT = 1883                                                # PORT of the MQTT BROKER
 
-            print("_____________________________________\n")
+                    try:  
+                        client.loop_start()                                         # Start client loop: connect to MQTT Broker, proceed on binded functions: on_connect and on_message
+                        '''
+                            Kepp alive, 3rd argument of the function ensures that at least o package will be sent every 
+                            x seconds to the MQTT Broker so the connection between it and the client is not lost.
+                        '''
+                        client.connect(MQTT_BROKER, MQTT_PORT, 5)                 
+                    except Exception as e :
+                        # client.reinitialise()
+                        print(f" <!> [mqtt_server][MAIN]  Could not connect to MQTT Broker. {e}    <!>")
+
+                    print(f" <OK> [mqtt_server][MAIN]  Connecting to MQTT Broker: {MQTT_BROKER}, MQTT PORT: {MQTT_PORT}")
+
+                    while not client.connected_flag:                                # Wait in loop until connection succsessfull.
+                        print(" <!> [mqtt_server][MAIN]   In wait loop ")
+                        time.sleep(5)
     
-    except KeyboardInterrupt:
-            client.publish('RaspPi/WiFiStatus',"Disconnected")
-            client.publish('RaspPi/ScriptConToMQTT',"Stopped")
-            client.publish('RaspPi/CurrentTime','   -- : -- : --    ')
-            print("\n[mqtt_raspi_status]   KeyboardInterrupt: Exiting the current time loop.")
-            client.loop_stop()                                              # Stop loop 
-            client.disconnect()                                             # Disconnect
+                    print(f" <OK> [mqtt_server][MAIN]   In Main Loop ")
 
-    except Exception as e:
-        print(f" <!> [mqtt_server]  Could not connect to MQTT Broker. {e}    <!>")  
-        exit(1)
+                    time.sleep(2.5)                                                 # Delay for client loop, best > 2 seconds.
+                    print("_____________________________________\n")
+                    print('\n')
+                except Exception as e:
+                    print(f" <!> [mqtt_server][MAIN]  Could not connect to MQTT Broker. {e}    <!>")
+                    time.sleep(0.5)
+                    client.reconnect()
+
+        except KeyboardInterrupt:
+                client.publish('RaspPi/WiFiStatus',"Disconnected")
+                client.publish('RaspPi/ScriptConToMQTT',"Stopped")
+                client.publish('RaspPi/CurrentTime','   -- : -- : --    ')
+                print("\n[mqtt_raspi_status]   KeyboardInterrupt: Exiting the current time loop.")
+                client.loop_stop()                                              # Stop loop 
+                client.disconnect()                                             # Disconnect
+                exit(0)
+    
+        except TimeoutError :
+            print(f" <!> [mqtt_server][MAIN]  Could not connect to MQTT Broker --> TimeoutError <!>")
+            pass
+        
+        # Used to correct the BlockingIOError that comes with bufsize : Bad file descriptor , socket error???
+        except BlockingIOError:
+            print(f" <!> [mqtt_server][MAIN]  Could not connect to MQTT Broker --> BlockingIOError  <!>")
+            pass
+
+        except None as e:
+            print(f" <!> [mqtt_server][MAIN]  Passed on None type error <!>")
+            pass
+
+        except ConnectionError:
+            print(f" <!> [mqtt_server][MAIN]  Could not connect to MQTT Broker --> BlockingIOError <!>")
+            pass
+
+        except ValueError:
+            print(f" <!> [mqtt_server][MAIN]  Could not connect to MQTT Broker --> ValueError <!>")
+            pass
+
+        except OverflowError:
+            print(f" <!> [mqtt_server][MAIN]  Could not connect to MQTT Broker --> OverflowError <!>")
+            pass
+
+        except Exception as e:
+            print(f" <!> [mqtt_server][MAIN]  Could not connect to MQTT Broker. {e}    <!>")  
+            # exit(1)
+
+
+    #####################################################################################################################################
+    #|                                   ESTABLISH CONNECTION & START CLIENT LOOP FUNCTION CALL                                        |#
+    #####################################################################################################################################
+    mqtt_server_connection()
 
 
    
@@ -79,6 +140,4 @@ class mqtt_connect():
 
 #_______________________________________________________________________________________________________________________________#
 #________________________________________________________ DEBUG_AREA____________________________________________________________#
-    
-
     

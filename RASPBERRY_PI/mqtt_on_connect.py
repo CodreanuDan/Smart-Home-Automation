@@ -35,7 +35,7 @@ class mqtt_on_connect():
         try:
             if rc == 0:
                 connectionReturnCodes = mqtt_dictionary.mqtt_dictionary()
-                client.connected_flag=True 
+                client.connected_flag = True 
                 print(f" <OK> [mqtt_on_connect]  Connected with result code: {rc} - {connectionReturnCodes[rc]}    ")
 
                 time.sleep(1)
@@ -44,9 +44,23 @@ class mqtt_on_connect():
                 topic_subscriber.topic_subscribe(client, rc)    # Call the topic_subscribe method on the instance
 
             else:
+                client.connected_flag = False
                 connectionReturnCodes = mqtt_dictionary.mqtt_dictionary()
                 if rc in mqtt_dictionary.mqtt_dictionary():
                     print(f" <!> [mqtt_on_connect]  Could not connect with code:{rc} - {connectionReturnCodes[rc]}     ")
+
+        except TimeoutError :
+            print(f" <!>  [mqtt_on_connect]   --> TimeoutError <!>")
+            pass
+
+        except BlockingIOError:
+            print(f" <!>  [mqtt_on_connect]   --> BlockingIOError  <!>")
+            pass
+
+        except None as e:
+            print(f" <!>  [mqtt_on_connect]  Passed on None type error <!>")
+            pass
+
         except Exception as e:
             print(f" <!> [mqtt_on_connect]  Could not connect. {e}     ")
 

@@ -1,8 +1,8 @@
 {
-    "esp32/no.1/roomTemp": "22.02",
-    "esp32/no.1/airHum": "44.22",
-    "esp32/no.1/sysState": "COOLING",
-    "RaspPi/esp32/no.1/temperatureControl": "22",
+    "esp32/no.1/roomTemp": "22.07",
+    "esp32/no.1/airHum": "37.11",
+    "esp32/no.1/sysState": "HEATING",
+    "RaspPi/esp32/no.1/temperatureControl": "30",
     "RaspPi/esp32/no.1/outputRed": " ",
     "RaspPi/esp32/no.1/Reset": " "
 }

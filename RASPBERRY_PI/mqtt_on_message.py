@@ -41,45 +41,66 @@ class mqtt_on_message():
                 Dumps received message from topic to json file : esp_received_msg.json
 
                 """
+            try:
+                if msg.payload == None or msg.topic == None:
+                    print(f" <!> [mqtt_on_message]   Received None type message!  {e}    ")
+                    pass
+                
+                else:
+                    #   TOPIC: "esp32/no.1/roomTemp"
+                    if msg.topic == "esp32/no.1/roomTemp":
+                        jsonDumperAirTemp = on_message_json_dump()
+                        jsonDumperAirTemp.json_dump_airTemp(msg)
+
+                    #   TOPIC: "esp32/no.1/airHum"
+                    elif msg.topic == "esp32/no.1/airHum":
+                        jsonDumperAirHum = on_message_json_dump()
+                        jsonDumperAirHum.json_dump_airHum(msg)
+
+                    #   TOPIC: "esp32/no.1/sysState"
+                    elif msg.topic == "esp32/no.1/sysState":
+                        jsonDumperSysState = on_message_json_dump()
+                        jsonDumperSysState.json_dump_sysState(msg)
+
+                        """
+                        JSON handlers for coming from DASHBOARD to RaspPI : Dashboard --> Topic --> RaspPI Python program --> JSON
+                        Dumps received message from topic to json file : esp_received_msg.json
+
+                        """
+
+                    #   TOPIC: RaspPi/esp32/no.1/outputRed
+                    # elif msg.topic == "RaspPi/esp32/no.1/outputRed":
+                        # jsonDumperLedOnOff = on_message_json_dump()
+                        # jsonDumperLedOnOff.json_dump_ledOnOff(msg)
+                    
+                    #   TOPIC: RaspPi/esp32/no.1/Reset
+                    # elif msg.topic == "RaspPi/esp32/no.1/Reset":
+                        # jsonDumperResetButton = on_message_json_dump()
+                        # jsonDumperResetButton.json_dump_resetButton(msg)
+
+                    #   TOPIC: RaspPi/esp32/no.1/temperatureControl
+                    elif msg.topic == "RaspPi/esp32/no.1/temperatureControl":
+                        jsonDumperSysState = on_message_json_dump()
+                        jsonDumperSysState.json_dump_tempCtrl(msg)
             
-            #   TOPIC: "esp32/no.1/roomTemp"
-            if msg.topic == "esp32/no.1/roomTemp":
-                jsonDumperAirTemp = on_message_json_dump()
-                jsonDumperAirTemp.json_dump_airTemp(msg)
+            except None as e:
+                print(f" <!> [mqtt_on_message]   Received None type message!  {e}    ")
 
-            #   TOPIC: "esp32/no.1/airHum"
-            elif msg.topic == "esp32/no.1/airHum":
-                jsonDumperAirHum = on_message_json_dump()
-                jsonDumperAirHum.json_dump_airHum(msg)
+        except TimeoutError :
+            print(f" <!>  [mqtt_on_message]   --> TimeoutError <!>")
+            pass
 
-            #   TOPIC: "esp32/no.1/sysState"
-            elif msg.topic == "esp32/no.1/sysState":
-                jsonDumperSysState = on_message_json_dump()
-                jsonDumperSysState.json_dump_sysState(msg)
+        except BlockingIOError:
+            print(f" <!>  [mqtt_on_message]   --> BlockingIOError  <!>")
+            pass
 
-                """
-                JSON handlers for coming from DASHBOARD to RaspPI : Dashboard --> Topic --> RaspPI Python program --> JSON
-                Dumps received message from topic to json file : esp_received_msg.json
+        except None as e:
+            print(f" <!>  [mqtt_on_message]  Passed on None type error <!>")
+            pass
 
-                """
-
-            #   TOPIC: RaspPi/esp32/no.1/outputRed
-            # elif msg.topic == "RaspPi/esp32/no.1/outputRed":
-                # jsonDumperLedOnOff = on_message_json_dump()
-                # jsonDumperLedOnOff.json_dump_ledOnOff(msg)
-            
-            #   TOPIC: RaspPi/esp32/no.1/Reset
-            # elif msg.topic == "RaspPi/esp32/no.1/Reset":
-                # jsonDumperResetButton = on_message_json_dump()
-                # jsonDumperResetButton.json_dump_resetButton(msg)
-
-            #   TOPIC: RaspPi/esp32/no.1/temperatureControl
-            elif msg.topic == "RaspPi/esp32/no.1/temperatureControl":
-                jsonDumperSysState = on_message_json_dump()
-                jsonDumperSysState.json_dump_tempCtrl(msg)
-            
         except Exception as e:
             print(f" <!> [mqtt_on_message]   Could not recive messages!  {e}    ")
+
 
 
 #_______________________________________________________________________________________________________________________________#

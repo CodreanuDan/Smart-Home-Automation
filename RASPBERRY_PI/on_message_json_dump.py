@@ -36,13 +36,16 @@ class on_message_json_dump():
         try:    
             with open("esp_received_msg.json", "r") as json_file_airTemp_r:
                 data_airTemp = json.load(json_file_airTemp_r)
-                data_airTemp["esp32/no.1/roomTemp"] = msg.payload.decode("utf-8")
+                target_msg_airTemp = data_airTemp["esp32/no.1/roomTemp"] = msg.payload.decode("utf-8")
                 print(f" <OK> [mqtt_on_message][airTemp]   Opened JSON for airTemp!       ")
 
                 try:
                     with open("esp_received_msg.json", "w") as json_file_airTemp_w:
-                        json.dump(data_airTemp, json_file_airTemp_w, indent = 4)
-                        print(f" <OK> [mqtt_on_message][airTemp]   Dumped into JSON for airTemp!  {data_airTemp}    ")
+                        if target_msg_airTemp != None:
+                            json.dump(data_airTemp, json_file_airTemp_w, indent = 4)
+                            print(f" <OK> [mqtt_on_message][airTemp]   Dumped into JSON for airTemp!  {data_airTemp}    ")
+                        elif target_msg_airTemp == None:
+                            print(f" <!> [mqtt_on_message][airTemp]   Received None Type message!  {data_airTemp}    ")
                 except Exception as e:
                     print(f" <!> [mqtt_on_message][airTemp]   Could not dump JSON for airTemp!  {e}    ")
 
@@ -55,13 +58,16 @@ class on_message_json_dump():
         try:    
             with open("esp_received_msg.json", "r") as json_file_airHum_r:
                 data_airHum = json.load(json_file_airHum_r)
-                data_airHum["esp32/no.1/airHum"] = msg.payload.decode("utf-8")
+                target_msg_airHum = data_airHum["esp32/no.1/airHum"] = msg.payload.decode("utf-8")
                 print(f" <OK> [mqtt_on_message][airHum]   Opened JSON for airHum!      ")
 
                 try:
                     with open("esp_received_msg.json", "w") as json_file_airHum_w:
-                        json.dump(data_airHum, json_file_airHum_w, indent = 4)
-                        print(f"  <OK> [mqtt_on_message][airHum]   Dumped into JSON for airHum!  {data_airHum}    ")
+                        if target_msg_airHum != None:
+                            json.dump(data_airHum, json_file_airHum_w, indent = 4)
+                            print(f"  <OK> [mqtt_on_message][airHum]   Dumped into JSON for airHum!  {data_airHum}    ")
+                        elif target_msg_airHum == None:
+                            print(f"  <!> [mqtt_on_message][airHum]   Received None Type message!  {data_airHum}    ")
                 except Exception as e:
                     print(f"  <!> [mqtt_on_message][airHum]   Could not dump JSON for airHum!  {e}     ")
 
@@ -74,15 +80,18 @@ class on_message_json_dump():
         try:
              with open("esp_received_msg.json","r") as json_file_sysState_r:
                 data_sysState = json.load(json_file_sysState_r)
-                data_sysState["esp32/no.1/sysState"] = msg.payload.decode("utf-8")
+                target_msg_sysState = data_sysState["esp32/no.1/sysState"] = msg.payload.decode("utf-8")
 
 
                 print(f" <OK> [mqtt_on_message][sysState]   Opened JSON for sysState!      ")
 
                 try:
                     with open("esp_received_msg.json","w") as json_file_sysState_w:
-                        json.dump(data_sysState, json_file_sysState_w, indent = 4)
-                        print(f" <OK> [mqtt_on_message][sysState]   Dumped into JSON for sysState!  {data_sysState}    ")
+                        if target_msg_sysState != None:
+                            json.dump(data_sysState, json_file_sysState_w, indent = 4)
+                            print(f" <OK> [mqtt_on_message][sysState]   Dumped into JSON for sysState!  {data_sysState}    ")
+                        elif target_msg_sysState == None:
+                            print(f" <!> [mqtt_on_message][sysState]   Received None Type message!  {data_sysState}    ")
                 except Exception as e:
                     print(f" <!> [mqtt_on_message][sysState]   Could not dump JSON for sysState!  {e}    ")
         except Exception as e:
@@ -142,15 +151,18 @@ class on_message_json_dump():
         try:
              with open("esp_received_msg.json","r") as json_file_tempCtrl_r:
                 data_tempCtrl = json.load(json_file_tempCtrl_r)
-                data_tempCtrl["RaspPi/esp32/no.1/temperatureControl"] = msg.payload.decode("utf-8")
+                target_msg_tempCtrl = data_tempCtrl["RaspPi/esp32/no.1/temperatureControl"] = msg.payload.decode("utf-8")
 
 
                 print(f" <OK> [mqtt_on_message][tempCtrl]   Opened JSON for tempCtrl!       ")
 
                 try:
                     with open("esp_received_msg.json","w") as json_file_tempCtrl_w:
-                        json.dump(data_tempCtrl, json_file_tempCtrl_w, indent = 4)
-                        print(f" <OK> [mqtt_on_message][tempCtrl]   Dumped into JSON for tempCtrl!  {data_tempCtrl}    ")
+                        if target_msg_tempCtrl != None:
+                            json.dump(data_tempCtrl, json_file_tempCtrl_w, indent = 4)
+                            print(f" <OK> [mqtt_on_message][tempCtrl]   Dumped into JSON for tempCtrl!  {data_tempCtrl}    ")
+                        elif target_msg_tempCtrl == None:
+                            print(f" <!> [mqtt_on_message][tempCtrl]   Received None Type message!  {data_tempCtrl}    ")
                 except Exception as e:
                     print(f" <!> [mqtt_on_message][tempCtrl]   Could not dump JSON for tempCtrl!  {e}     ")
         except Exception as e:
