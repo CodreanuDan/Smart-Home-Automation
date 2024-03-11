@@ -39,7 +39,7 @@ void T_scanI2CTask(void* parameter)                                             
 {
   //for(;;)
   //{
-    char* taskName = "scanI2CTask";
+    char* taskName = "scanI2CTask";                                                       /* Task name for dataLog function */
 
     delay(tc_taskFunc_delay);
 

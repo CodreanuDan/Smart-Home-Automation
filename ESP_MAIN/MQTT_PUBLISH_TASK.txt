@@ -1,0 +1,92 @@
+/****************************************************************************************************************************/
+/*___________________________________________________DESCRIERE_MODUL________________________________________________________*/
+/****************************************************************************************************************************/
+
+/*   ---> MODULE NAME: MQTT_PUB_TASK_FUNCTIONS.h */
+
+/*   ---> Modulul contine functiile task-ului care se ocupa de trimiterea de date la serverul MQTT 
+
+/*   ---> Modulul contine functiile task-ului: Task :        -> functia principala a task-ului:   -> T_MQTT_PublishTask(void* parameter) 
+                                                             -> functia de comunicare:            -> MQTT_publishData() 
+                                                             */
+
+#ifndef MQTT_PUB_TASK_FUNCTIONS
+#define MQTT_PUB_TASK_FUNCTIONS
+
+
+/****************************************************************************************************************************/
+/*______________________________________________________INCLUDES____________________________________________________________*/
+/****************************************************************************************************************************/
+
+/*__LIBRARIES__*/
+#include <PubSubClient.h>                                                                /* MQTT Communication Protocol library */
+
+/*__MODULES__*/
+#include "DEFINES.h"                                                                     /*  Includes all the variables used on the program*/
+
+
+/****************************************************************************************************************************/
+/*__________________________________________________SUB_ROUTINES____________________________________________________________*/
+/****************************************************************************************************************************/
+void MQTT_publishData();                                                                 /* Function responsable for MQTT communication: publishing data to MQTT Server*/
+
+
+/****************************************************************************************************************************/
+/*____________________________________________________TASK_FUNCTION_________________________________________________________*/
+/****************************************************************************************************************************/
+void T_MQTT_PublishTask(void* parameter)                                                 /* Main function of the Task */
+{
+  for(;;)
+  {
+    char* taskName = "T_MQTT_PublishTask";                                               /* Task name for dataLog function */
+
+    delay(tc_taskFunc_delay);
+
+    /*________TASK_SUB-ROUTINES___________*/ 
+
+    dataLog(taskName, p_MQTT_CommunciationTask);                                         /* Task info */ 
+
+    MQTT_publishData();                                                                  /* Function responsable for MQTT communication */
+
+    /*____________________________________*/
+
+    delay(tc_taskFunc_delay);
+
+    vTaskDelay(pdMS_TO_TICKS(tc_MQTT_publishDataTask_delay));                            /* Delay the task */
+
+  
+  }
+
+}
+
+
+/****************************************************************************************************************************/
+/*__________________________________________________MQTT_PUBLISH_FUNCTION___________________________________________________*/
+/****************************************************************************************************************************/
+void MQTT_publishData()                                                                  /* Subroutine for MQTT Communication responsable for publishing data to subscribed MQTT topics  */
+{
+  Serial.println("<MQTT> Publish Data: ");
+
+  char roomTempStr[8];                                                                   /* Convert to char Temperarture */
+  dtostrf(v_temperatureValue,1,2,roomTempStr);
+  Serial.print("--> Temperature converted to string: ");
+  Serial.println(roomTempStr);
+  client.publish("esp32/no.1/roomTemp",roomTempStr);                                     /* Publish to Python Program of the MQTT Server: roomTempStr (Temeprature) via topic: "esp32/no.1/roomTemp" */
+
+  char airHumStr[8];                                                                     /* Convert to char Humidity */
+  dtostrf(v_humidityValue,1,2,airHumStr);
+  Serial.print("--> Humidity converted to string: ");
+  Serial.println(airHumStr);
+  client.publish("esp32/no.1/airHum",airHumStr);                                         /* Publish to Python Program of the MQTT Server: airHumStr (Air Humidity %)via topic: "esp32/no.1/airHum"*/
+ 
+  Serial.print("--> State converted to string: ");
+  Serial.println(stateToString(currentState));
+  client.publish("esp32/no.1/sysState",(stateToString(currentState)));                   /* Publish to Python Program of the MQTT Server: stateToString(currentState) (Climate control state)via topic: "esp32/no.1/sysState" */
+}
+
+
+/****************************************************************************************************************************/
+
+#endif                                                                                   /* MQTT_PUB_TASK_FUNCTIONS */
+
+

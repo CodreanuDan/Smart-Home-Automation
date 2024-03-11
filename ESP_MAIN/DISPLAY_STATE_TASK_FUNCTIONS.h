@@ -36,7 +36,7 @@ void T_displayStateTask(void* parameter)                                        
 {
   for(;;)
   {
-    char* taskName = "displayStateTask";
+    char* taskName = "displayStateTask";                                             /* Task name for dataLog function */
 
     delay(tc_taskFunc_delay);
 

@@ -8,7 +8,7 @@
 
 /*   ---> Modulul contine functiile task-ului: shtReadTask : -> functia principala a task-ului:       -> T_shtReadTask(void* parameter)
                                                              -> functia de citire de la senzor:       -> shtRead() 
-                                                             -> functia de verificare a citirii:      -> checkReads()
+                                                             -> functia de verificare a citirii:      -> checkReadsSht()
                                                             */
 
 #ifndef SHT_TASK_FUNCTIONS
@@ -29,7 +29,7 @@
 /*__________________________________________________SUB_ROUTINES____________________________________________________________*/
 /****************************************************************************************************************************/
 void shtRead();                                                                            /* Function that reads the data from SHT21 Sensor via I2C */
-void checkReads(char* taskName);                                                           /* Function that checkf if any reads failed and exit early (to try again) */
+void checkReadsSht(char* taskName);                                                        /* Function that checkf if any reads failed and exit early (to try again) */
 
 
 /****************************************************************************************************************************/
@@ -39,7 +39,7 @@ void T_shtReadTask(void* parameter)                                             
 {
   for(;;)
   {
-    char* taskName = "shtReadTask";
+    char* taskName = "shtReadTask";                                                       /* Task name for dataLog function */
 
     delay(tc_taskFunc_delay);
 
@@ -47,7 +47,7 @@ void T_shtReadTask(void* parameter)                                             
 
     shtRead();                                                                            /* Sensor readings */
 
-    checkReads(taskName);                                                                 /* Check sensor readings + dataLog (Task info)*/
+    checkReadsSht(taskName);                                                              /* Check sensor readings + dataLog (Task info)*/
 
     /*____________________________________*/
 
@@ -79,12 +79,12 @@ void shtRead()                                                                  
 /****************************************************************************************************************************/
 /*___________________________________________________CHECK_READS_FUNCTION___________________________________________________*/
 /****************************************************************************************************************************/
-void checkReads(char* taskName)                                                           /* Function that checkf if any reads failed and exit early (to try again) */
+void checkReadsSht(char* taskName)                                                        /* Function that checks if any reads failed and exit early (to try again) */
 {
 
   if (isnan(v_humidityValue) || isnan(v_temperatureValue))                                /* Check if any reads failed and exit early (to try again) */
     {
-      Serial.println("[#] dhtReadTask() : Failed to read from DHT sensor!");
+      Serial.println("[#] dhtReadTask() : Failed to read from SHT21 sensor!");
       return;                                                                             /* Try again ! */
     } 
     else 

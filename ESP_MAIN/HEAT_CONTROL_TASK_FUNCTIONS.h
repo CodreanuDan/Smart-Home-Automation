@@ -31,7 +31,7 @@
 void heatControl();                                                                   /* Controls the Heating. Calls dhtReadTask() & toggleHeat(bool state). Can change the currentState between OFF <--> HEATING */
 void toggleHeat(bool state);                                                          /* Toggles the HEAT --> ON/OFF */
 void heatOnSignal();                                                                  /* Signals the currentState for Heat Control */
-
+void toggleFan0(bool state);                                                          /* Toggles the FAN --> ON/OFF when no threshold is recived from MQTT Server (0)*/ 
 
 /****************************************************************************************************************************/
 /*____________________________________________________TASK_FUNCTION_________________________________________________________*/
@@ -40,7 +40,7 @@ void T_heatControlTask(void* parameter)                                         
 {
   for(;;)
   {
-    char* taskName = "heatControlTask";
+    char* taskName = "heatControlTask";                                              /* Task name for dataLog function */
 
     delay(tc_taskFunc_delay);
 
@@ -81,9 +81,24 @@ void heatControl()                                                              
             currentState = HEATING;
             toggleHeat(true);                                                        /* Calls the toggleHeat function to switch the heat ON */
           }
+          else if(v_temperatureThreshold == 0)                                       /* Switches OFF the Fan and Heating when no threshold is recived */
+          {
+            currentState = OFF;
+            toggleHeat(false);
+            toggleFan0(false);
+          }
           break;
         case HEATING:
-          if (v_temperatureValue >= v_temperatureThreshold) 
+          if(v_temperatureThreshold == 0)                                            /* Switches OFF the Fan and Heating when no threshold is recived */
+          {
+            currentState = OFF;
+            if (currentState == OFF)
+            {
+              toggleHeat(false);
+              toggleFan0(false);
+            }
+          }
+          else if (v_temperatureValue >= v_temperatureThreshold) 
           {
             currentState = OFF;
             toggleHeat(false);                                                       /* Calls the toggleHeat function to switch the heat OFF */
@@ -103,6 +118,17 @@ void toggleHeat(bool state)                                                     
   digitalWrite(pin_heatRelayPin, state ? HIGH : LOW);                                /* Toggles the heat by checking the currentState */ 
   Serial.println(state ? "Heat is ON" : "Heat is OFF");
 }
+
+
+/****************************************************************************************************************************/
+/*___________________________________________________TOGGLE_FAN__FUNCTION __________________________________________________*/
+/****************************************************************************************************************************/
+void toggleFan0(bool state)                                                           /* Toggles the FAN --> ON/OFF when no threshold is recived from MQTT Server (0)*/ 
+{
+  digitalWrite(pin_fanRelayPin, state ? HIGH : LOW);                                  /* Toggles the fan by checking the currentState */                 
+  Serial.println(state ? "Fan is ON" : "Fan is OFF");
+}
+
 
 /****************************************************************************************************************************/
 /*_____________________________________________________HEAT_INFO_FUNCTION___________________________________________________*/

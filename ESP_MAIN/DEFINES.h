@@ -11,21 +11,32 @@
 #ifndef DEFINES
 #define DEFINES
 
-/*###################################################################################################################################################################*/
-/*__________________________________________________________________DEFINES_&_DECLARATIONS:__________________________________________________________________________*/
-/*###################################################################################################################################################################*/
+/*##########################################################################################################################*/
+/*|_______________________________________________DEFINES_&_DECLARATIONS:__________________________________________________|*/
+/*##########################################################################################################################*/
 
 
+
+/*##########################################################################################################################*/
+/*|______________________________________________________SENSORS:__________________________________________________________|*/
+/*##########################################################################################################################*/
 
 /****************************************************************************************************************************/
 /*________________________________________________________SHT_21____________________________________________________________*/
 /****************************************************************************************************************************/
+/* SHT 21 PINS: --> D21: I2C SDA - Serial data
+                --> D22: I2C SCL - Serial clock
+                (ESP 32 Pinout diagram - I2C bus pins           */
 SHT21 sht;                                                      /* Declararea unui obiect de tip SHT21 numit sht */ 
 
 //__SHT_VALUES__
 float v_temperatureValue;                                       /* SHT temp (C*)   */
 float v_humidityValue;                                          /* SHT RH (%)      */
 
+
+/*##########################################################################################################################*/
+/*|________________________________________________________COM:____________________________________________________________|*/
+/*##########################################################################################################################*/
 
 /****************************************************************************************************************************/
 /*______________________________________________________WIFI_LIB____________________________________________________________*/
@@ -53,19 +64,22 @@ char msg[50];                                                   /* Size of messa
 //_Wi-Fi_Network_Name(SSID):
 // #define ssid "CDIDC"
 #define ssid "TP-Link_47D4"
+// #define ssid "E204"
 
 //_Wi-Fi_Network_Password:
 // #define password "SkodaOctavia2005"
 #define password "29393145"
+// #define password "passwlane204ieeia"
 
 //_MQTT_Server_Adress:
 // #define mqtt_server "192.168.0.24"                               /* MQTT Server --> BACAU  */
 #define mqtt_server "192.168.1.193"                             /* MQTT Server --> IASI  */
+// #define mqtt_server "192.168.0.152"                                 /* MQTT Server --> E204  */
 
 
-/****************************************************************************************************************************/
-/*__________________________________________________CLIMATE_CONTROL_________________________________________________________*/
-/****************************************************************************************************************************/
+/*##########################################################################################################################*/
+/*|_____________________________________________CLIMATE_CONTROL:___________________________________________________________|*/
+/*##########################################################################################################################*/
 
 //_____________STATES:
 enum State                                                      /* enum of the states of the system    */
@@ -102,6 +116,10 @@ float v_humidityThreshold            = 70;                      /* It will be au
 bool f_fanControlTask  = false;                                 /*  Flag for Fan  Control - flag false --> true: flag ; decision -->  flag false  */
 bool f_heatControlTask = false;                                 /*  Flag for Heat Control - flag false --> true: flag ; decision -->  flag false  */
 
+/*##########################################################################################################################*/
+/*|__________________________________________________VARS,PINS:____________________________________________________________|*/
+/*##########################################################################################################################*/
+
 /****************************************************************************************************************************/
 /*____________________________________________________VARIABILES____________________________________________________________*/
 /****************************************************************************************************************************/
@@ -114,16 +132,21 @@ bool f_heatControlTask = false;                                 /*  Flag for Hea
 /****************************************************************************************************************************/
 
 //________________INPUT_PINS: (will be added in the future)
-/* FOR I2C BUS: --> D21: SDA - Serial data
-                --> D22: SCL - Serial clock
+/* FOR I2C BUS: --> D21: I2C SDA - Serial data
+                --> D22: I2C SCL - Serial clock
                 (ESP 32 Pinout diagram)     */
+#define pin_mq2Pin               2                              /* Pin for MQ 2 Gas Sensor, it is used to receive data from the sensor (ADC2 CH2) */
 
 //_______________OUTPUT_PINS:
-#define pin_heatRelayPin        16                              /* Heat relay  pin  (toggle heat on/off)                               */
-#define pin_fanRelayPin         17                              /* Fan relay   pin  (toggle fan on/off)                                */
+#define pin_heatRelayPin        16                              /* Heat relay  pin  (toggle heat ON/OFF)                               */
+#define pin_fanRelayPin         17                              /* Fan relay   pin  (toggle fan ON/OFF)                                */
 
 #define pin_ledBuiltInPin        2                              /* LedBuiltIn  pin  (signal if connection to MQTT Server is realized)  */   
 #define pin_ledRedPin            4                              /* Pin for led(in role of lights ON/OFF)                               */
+
+/*##########################################################################################################################*/
+/*|____________________________________________________TASKS:______________________________________________________________|*/
+/*##########################################################################################################################*/
 
 /****************************************************************************************************************************/
 /*____________________________________________TASK_DATA_LOG_FUNCTION________________________________________________________*/
@@ -157,11 +180,11 @@ void dataLog(char* taskName, int taskPrio)                      /* Function that
 
 //__Sensor_Tasks:
 const int p_shtReadTask              = 10;                      /*  >> shtReadTask priority: MEDIUM          */  
-const int p_mqReadTask               = 10;                      /*  >> mqReadTask priority: MEDIUM           */  
+// const int p_mqReadTask               = 10;                      /*  >> mqReadTask priority: MEDIUM           */  
 
 //_Display_Tasks:
 const int p_displayStateTask         = 20;                      /*  >> displayStateTask priority: MEDIUM     */
-const int p_shtDisplayTask           = 20;                      /*  >> shtDisplayTask priority: MEDIUM       */
+const int p_sensorsDisplayTask       = 20;                      /*  >> sensorsDisplayTask priority: MEDIUM   */
 
 //_Control_Tasks:
 const int p_fanControlTask           = 25;                      /*  >> fanControlTask priority: MEDIUM       */
@@ -175,18 +198,20 @@ const int p_scanI2CTask              = 1;                       /*  >> scanI2CTa
 //_____Com_Tasks:
 const int p_setupWiFiTask            = 2;                       /*  >> setupWiFiTask priority: HIGH          */
 const int p_MQTT_CommunciationTask   = 5;                       /*  >> MQTT_CommunciationTask priority: HIGH */
+const int p_MQTT_publishDataTask     = 6;                       /*  >> MQTT_CommunciationTask priority: HIGH */
 
 //__TIME_CONSTARINS__(ms):
 
-#define tc_moduleSetup_delay         50                         /* Delay set between each part of the setup modules                                                  */
-#define tc_objCreate_delay           25                         /* Delay set between initialization of each object part of a module in setup                         */
-#define tc_taskFunc_delay            25                         /* Short delay before and after task routine executes                                                */
-#define tc_quickTask_delay           1000                       /* Delay for short tasks (ex: display tasks etc.)                                                    */
-#define tc_measureTask_delay         1000                       /* Delay for sensor tasks                                                                            */
-#define tc_controlTask_delay         1000                       /* Delay for control tasks (ex: relay control tasks etc.)                                            */
-#define tc_wifiSetupScan_delay       500                        /* Delay for WiFi setup - set the time between pings for trying to connect to WiFi networks          */
-#define tc_mqttReconnect_delay       5000                       /* Delay for MQTT Server reconnect - Wait 5 seconds before retrying                                  */
-#define tc_ESPReset_delay            1000                       /* Delay for ESP restart                                                                             */ 
+#define tc_moduleSetup_delay          50                         /* Delay set between each part of the setup modules                                                  */
+#define tc_objCreate_delay            1000                       /* Delay set between initialization of each object part of a module in setup                         */
+#define tc_taskFunc_delay             25                         /* Short delay before and after task routine executes                                                */
+#define tc_quickTask_delay            500                        /* Delay for short tasks (ex: display tasks etc.)                                                    */
+#define tc_measureTask_delay          1000                       /* Delay for sensor tasks                                                                            */
+#define tc_controlTask_delay          1000                       /* Delay for control tasks (ex: relay control tasks etc.)                                            */
+#define tc_wifiSetupScan_delay        500                        /* Delay for WiFi setup - set the time between pings for trying to connect to WiFi networks          */
+#define tc_mqttReconnect_delay        5000                       /* Delay for MQTT Server reconnect - Wait 5 seconds before retrying                                  */
+#define tc_ESPReset_delay             1000                       /* Delay for ESP restart                                                                             */ 
+#define tc_MQTT_publishDataTask_delay 2500                       /* Delay for publishig data to MQTT Server topics                                                    */
 
 
 /****************************************************************************************************************************/
@@ -197,11 +222,11 @@ const int p_MQTT_CommunciationTask   = 5;                       /*  >> MQTT_Comm
 
 //__Sensor_Tasks:
 TaskHandle_t                h_shtReadTask;                      /* >> shtReadTask handler            */
-TaskHandle_t                h_mqReadTask;                       /* >> shtReadTask handler            */
+// TaskHandle_t                h_mqReadTask;                       /* >> mqReadTask handler             */
 
 //_Display_Tasks:
 TaskHandle_t                h_displayStateTask;                 /* >> displayStateTask handler       */
-TaskHandle_t                h_shtDisplayTask;                   /* >> shtDisplayTask handler         */
+TaskHandle_t                h_sensorsDisplayTask;               /* >> sensorsDisplayTask handler     */
 
 //_Control_Tasks:
 TaskHandle_t                h_fanControlTask;                   /* >> fanControlTask handler         */
@@ -216,9 +241,11 @@ TaskHandle_t                h_scanI2CTask;                      /* >> scanI2CTas
 //_____Com_Tasks:
 TaskHandle_t                h_setupWiFiTask;                    /* >> setupWiFiTask handler          */
 TaskHandle_t                h_MQTT_CommunciationTask;           /* >> MQTT_CommunciationTask handler */
+TaskHandle_t                h_MQTT_publishDataTask;             /* >> MQTT_CommunciationTask handler */
+
 
 /****************************************************************************************************************************/
 
-#endif                                                                                    /* DEFINES */
+#endif                                                          /* DEFINES */
 
 

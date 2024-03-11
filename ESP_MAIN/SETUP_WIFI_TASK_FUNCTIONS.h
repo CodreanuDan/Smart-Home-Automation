@@ -37,7 +37,7 @@ void T_setupWifiTask(void* parameter)                                           
 {
   for(;;)
   {
-    char* taskName = "setupWifiTask";
+    char* taskName = "setupWifiTask";                                                     /* Task name for dataLog function */
 
     delay(tc_taskFunc_delay);
 

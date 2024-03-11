@@ -1,4 +1,4 @@
-#include "esp32-hal.h"
+// #include "esp32-hal.h"
 /****************************************************************************************************************************/
 /*___________________________________________________DESCRIERE_MODUL________________________________________________________*/
 /****************************************************************************************************************************/
@@ -33,7 +33,7 @@
 /****************************************************************************************************************************/
 void MQTT_Communciation();                                                                /* Function responsable for MQTT communication: reconnecting to server, publishing data, making decisions based on received data and sending updates to the system */
 void reconnect();                                                                         /* Subroutine for MQTT Communucation responsable for reconnecting to MQTT Server in case of dissconnecting  */
-void publishData();                                                                       /* Subroutine for MQTT Communication responsable for publishing data to subscribed MQTT topics  */
+// void publishData();                                                                       /* Subroutine for MQTT Communication responsable for publishing data to subscribed MQTT topics  */
 void callback(char* topic, byte* message, unsigned int length);                           /* Subroutine for MQTT Communication Task responsable for showing the received messages and making decisions accrodingly */
 
 
@@ -44,13 +44,13 @@ void T_MQTT_CommunciationTask(void* parameter)                                  
 {
   for(;;)
   {
-    char* taskName = "MQTT_CommunciationTask";
+    char* taskName = "MQTT_CommunciationTask";                                            /* Task name for dataLog function */
 
     delay(tc_taskFunc_delay);
 
     /*________TASK_SUB-ROUTINES___________*/ 
 
-    dataLog(taskName, p_MQTT_CommunciationTask);                                           /* Task info */ 
+    dataLog(taskName, p_MQTT_CommunciationTask);                                          /* Task info */ 
 
 
     MQTT_Communciation();                                                                 /* Function responsable for MQTT communication */
@@ -60,6 +60,7 @@ void T_MQTT_CommunciationTask(void* parameter)                                  
     delay(tc_taskFunc_delay);
 
     vTaskDelay(pdMS_TO_TICKS(tc_quickTask_delay));                                        /* Delay the task */
+  
   }
 
 }
@@ -80,7 +81,7 @@ void MQTT_Communciation()                                                       
   else if(client.connected())
   {
     client.loop();                                                                        /* Client loop : responsable for MQTT communication between the publishers and the subscribers, contains the callback function */  
-    publishData();                                                                        /* Subroutine for MQTT Communication responsable for publishing data to subscribed MQTT topics  */        
+    // publishData();                                                                        /* Subroutine for MQTT Communication responsable for publishing data to subscribed MQTT topics  */        
     long now = millis();                                                                  
 
     if (now - lastMsg > 5000) 
@@ -182,28 +183,29 @@ void reconnect()                                                                
 /****************************************************************************************************************************/
 /*__________________________________________________MQTT_PUBLISH_FUNCTION___________________________________________________*/
 /****************************************************************************************************************************/
-void publishData()                                                                        /* Subroutine for MQTT Communication responsable for publishing data to subscribed MQTT topics  */
-{
-  Serial.println("<MQTT> Publish Data: ");
+// void publishData()                                                                        /* Subroutine for MQTT Communication responsable for publishing data to subscribed MQTT topics  */
+// {
+//   Serial.println("<MQTT> Publish Data: ");
 
-  char roomTempStr[8];                                                                   /* Convert to char Temperarture */
-  dtostrf(v_temperatureValue,1,2,roomTempStr);
-  Serial.print("--> Temperature converted to string: ");
-  Serial.println(roomTempStr);
-  client.publish("esp32/no.1/roomTemp",roomTempStr);                                     /* Publish to Python Program of the MQTT Server: roomTempStr (Temeprature) via topic: "esp32/no.1/roomTemp" */
+//   char roomTempStr[8];                                                                   /* Convert to char Temperarture */
+//   dtostrf(v_temperatureValue,1,2,roomTempStr);
+//   Serial.print("--> Temperature converted to string: ");
+//   Serial.println(roomTempStr);
+//   client.publish("esp32/no.1/roomTemp",roomTempStr);                                     /* Publish to Python Program of the MQTT Server: roomTempStr (Temeprature) via topic: "esp32/no.1/roomTemp" */
 
-  char airHumStr[8];                                                                     /* Convert to char Humidity */
-  dtostrf(v_humidityValue,1,2,airHumStr);
-  Serial.print("--> Humidity converted to string: ");
-  Serial.println(airHumStr);
-  client.publish("esp32/no.1/airHum",airHumStr);                                         /* Publish to Python Program of the MQTT Server: airHumStr (Air Humidity %)via topic: "esp32/no.1/airHum"*/
+//   char airHumStr[8];                                                                     /* Convert to char Humidity */
+//   dtostrf(v_humidityValue,1,2,airHumStr);
+//   Serial.print("--> Humidity converted to string: ");
+//   Serial.println(airHumStr);
+//   client.publish("esp32/no.1/airHum",airHumStr);                                         /* Publish to Python Program of the MQTT Server: airHumStr (Air Humidity %)via topic: "esp32/no.1/airHum"*/
  
-  Serial.print("--> State converted to string: ");
-  Serial.println(stateToString(currentState));
-  client.publish("esp32/no.1/sysState",(stateToString(currentState)));                   /* Publish to Python Program of the MQTT Server: stateToString(currentState) (Climate control state)via topic: "esp32/no.1/sysState" */
-}
+//   Serial.print("--> State converted to string: ");
+//   Serial.println(stateToString(currentState));
+//   client.publish("esp32/no.1/sysState",(stateToString(currentState)));                   /* Publish to Python Program of the MQTT Server: stateToString(currentState) (Climate control state)via topic: "esp32/no.1/sysState" */
+// }
+
 /****************************************************************************************************************************/
 
-#endif                                                                                    /* _TASK_FUNCTIONS */
+#endif                                                                                   /* MQTT_COM_TASK_FUNCTIONS */
 
 

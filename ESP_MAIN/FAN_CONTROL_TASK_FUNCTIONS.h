@@ -31,7 +31,7 @@
 void fanControl();                                                                     /* Controls the Fan. Calls dhtReadTask() & toggleFan(bool state). Can change the currentState between OFF <--> COOLING */
 void toggleFan(bool state);                                                            /* Toggles the FAN --> ON/OFF */
 void fanOnSignal();                                                                    /* Signals the currentState for Fan Control */
-
+void toggleHeat0(bool state);                                                          /* Toggles the HEAT --> ON/OFF when no threshold is recived from MQTT Server (0)*/ 
 
 /****************************************************************************************************************************/
 /*____________________________________________________TASK_FUNCTION_________________________________________________________*/
@@ -40,7 +40,7 @@ void T_fanControlTask(void* parameter)                                          
 {
   for(;;)
   {
-    char* taskName = "fanControlTask";
+    char* taskName = "fanControlTask";                                                 /* Task name for dataLog function */
 
     delay(tc_taskFunc_delay);
 
@@ -76,21 +76,33 @@ void fanControl()                                                               
       switch (currentState)                                                            /* Switch the current system state between OFF and COOLING by comparing the temperature with the threshold */ 
       {
         case OFF:
-          if (v_temperatureValue > v_temperatureThreshold) 
+          if(v_temperatureThreshold == 0)                                              /* Switches OFF the Fan and Heating when no threshold is recived */
+          {
+            currentState = OFF;
+            toggleFan(false);
+            toggleHeat0(false);
+          }
+          else if (v_temperatureValue > v_temperatureThreshold) 
           {
             currentState = COOLING;
             toggleFan(true);                                                           /* Calls the toggleFan function to switch the fan ON */
           }
-
           break;
-
         case COOLING:
           if (v_temperatureValue <= v_temperatureThreshold) 
           {
             currentState = OFF;
             toggleFan(false);                                                          /* Calls the toggleFan function to switch the fan OFF */
           }
-
+          else if(v_temperatureThreshold == 0)                                         /* Switches OFF the Fan and Heating when no threshold is recived */
+          {
+            currentState = OFF;
+            if (currentState == OFF)
+            {
+              toggleFan(false);
+              toggleHeat0(false);
+            }
+          }
           break;
       }
       f_fanControlTask = false;                                                        /* After the whole operation the flag becomes false until the task is activated again (am observat ca asa se trimite comanda doar odata fara sa fie continua ?!) */
@@ -105,6 +117,15 @@ void toggleFan(bool state)                                                      
 {
   digitalWrite(pin_fanRelayPin, state ? HIGH : LOW);                                   /* Toggles the fan by checking the currentState */                 
   Serial.println(state ? "Fan is ON" : "Fan is OFF");
+}
+
+/****************************************************************************************************************************/
+/*___________________________________________________TOGGLE_HEAT_FUNCTION___________________________________________________*/
+/****************************************************************************************************************************/
+void toggleHeat0(bool state)                                                          /* Toggles the HEAT --> ON/OFF when no threshold is recived from MQTT Server (0)*/ 
+{
+  digitalWrite(pin_heatRelayPin, state ? HIGH : LOW);                                 /* Toggles the heat by checking the currentState */ 
+  Serial.println(state ? "Heat is ON" : "Heat is OFF");
 }
 
 /****************************************************************************************************************************/
