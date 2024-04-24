@@ -7,13 +7,16 @@
 
 #_______________________________________________________________________________________________________________________________#
 #_____________________________________________________IMPORT_LIBRARIES__________________________________________________________#
+from on_message_json_dump import on_message_json_dump  # Module responsable for JSON Dump of the values that came from topics, so that they can be accsesed with ease by other modules(mqtt_topic_subscribe).
 import paho.mqtt.client as mqtt
 from datetime import datetime
 import time
+import asyncio
 
 #_______________________________________________________________________________________________________________________________#
 #______________________________________________________IMPORT MODULES___________________________________________________________#
-from get_wifi_info import get_wifi_info
+from get_wifi_info import get_wifi_info             # Class that handles the communication with the wifi API.
+from get_outside_temp  import get_outside_temp      # Class that handles the communication with the weather API  
 
 #_______________________________________________________________________________________________________________________________#
 #_____________________________________________________GLOBAL_VARIABLES__________________________________________________________#
@@ -21,7 +24,7 @@ from get_wifi_info import get_wifi_info
 #_______________________________________________________________________________________________________________________________#
 #_______________________________________________________MAIN_FUNCTION___________________________________________________________#
 
-class mqtt_raspi_status():
+class mqtt_raspi_status():         
 
     def script_conMQTT(self,client,MQTT_TOPIC):
         try:    
@@ -56,7 +59,32 @@ class mqtt_raspi_status():
             print(f" <OK> [mqtt_raspi_status]   Topic: {MQTT_TOPIC};    current time: {formatted_time}      ")
         except Exception as e:
             print(f" <!> [mqtt_raspi_status]   Topic: {MQTT_TOPIC};    could not send current time: {formatted_time}. {e}    ")
-            
+
+
+    def get_outside_temperature_status(self,client,MQTT_TOPIC_DASH,MQTT_TOPIC_ESP,location):
+        
+        try:
+            outside_temp_message = None
+            try:
+                outside_temp_message = asyncio.run(get_outside_temp.get_weather(location)) # Call the method on the class
+                jsonDumperSetLocation= on_message_json_dump()
+                if outside_temp_message != None:
+                    jsonDumperSetLocation.json_dump_outTemp(outside_temp_message)
+                else:
+                    print(f" <!> [mqtt_raspi_status] from [get_outside_temp]: Could not get the temperature, None Type:. {e}     ")
+            except Exception as e:
+                print(f" <OK> [mqtt_raspi_status] from [get_outside_temp]: Exception {e}   ")    
+
+            print(f" <OK> [mqtt_raspi_status] from [get_outside_temp]: Outside Temperature: {outside_temp_message}°C   ")    
+
+            client.publish(MQTT_TOPIC_DASH, outside_temp_message)
+            client.publish(MQTT_TOPIC_ESP, outside_temp_message)
+            print(f" <OK> [mqtt_raspi_status]   Topic: {MQTT_TOPIC_DASH}(Dash);    Published Outside Temperature: {outside_temp_message}°C     ")
+            print(f" <OK> [mqtt_raspi_status]   Topic: {MQTT_TOPIC_ESP}(ESP);    Published Outside Temperature: {outside_temp_message}°C     ")
+        except Exception as e:
+            print(f" <!> [mqtt_raspi_status]   Topic: {MQTT_TOPIC_DASH}(Dash);    Could not send Outside Temperature: {outside_temp_message}°C. {e}      ")
+            print(f" <!> [mqtt_raspi_status]   Topic: {MQTT_TOPIC_ESP}(ESP);    Could not send Outside Temperature: {outside_temp_message}°C. {e}      ")
+            pass
         
 
 #_______________________________________________________________________________________________________________________________#
@@ -64,3 +92,16 @@ class mqtt_raspi_status():
 
 #_______________________________________________________________________________________________________________________________#
 #________________________________________________________ DEBUG_AREA____________________________________________________________#
+if __name__ == "__main__":
+    client = mqtt.Client()
+    MQTT_TOPIC = "RaspPi/WiFiStatus"
+    MQTT_TOPIC2 = "RaspPi/ScriptConToMQTT"
+    MQTT_TOPIC3 = "RaspPi/CurrentTime"
+    MQTT_TOPIC4 = "RaspPi/OutsideTemp"
+
+    mqtt_raspi_status_instance = mqtt_raspi_status()
+
+    mqtt_raspi_status_instance.script_conMQTT(client,MQTT_TOPIC2)
+    mqtt_raspi_status_instance.wifi_status(client,MQTT_TOPIC)
+    mqtt_raspi_status_instance.get_current_time(client,MQTT_TOPIC3)
+    mqtt_raspi_status_instance.get_outside_temperature_status(client,MQTT_TOPIC4,location = "Ruginoasa")

@@ -1,0 +1,101 @@
+#include "esp32-hal-gpio.h"
+/****************************************************************************************************************************/
+/*___________________________________________________DESCRIERE_MODUL________________________________________________________*/
+/****************************************************************************************************************************/
+
+/*   ---> MODULE NAME: LDR_TASK_FUNCTIONS.h */
+
+/*   ---> Modulul contine functiile task-ului care se ocupa de citirea datelor de la senzorul Fotorezistor cu iesire digitala LDR (int.lumina)
+
+/*   ---> Modulul contine functiile task-ului: LDRReadTask : -> functia principala a task-ului:       -> T_LDRReadTask(void* parameter)
+                                                             -> functia de citire de la senzor:       -> LDRRead() 
+                                                             -> functia de verificare a citirii:      -> checkReadsLDR()
+                                                            */
+
+#ifndef LDR_TASK_FUNCTIONS
+#define LDR_TASK_FUNCTIONS
+
+/****************************************************************************************************************************/
+/*______________________________________________________INCLUDES____________________________________________________________*/
+/****************************************************************************************************************************/
+
+/*__LIBRARIES__*/
+
+/*__MODULES__*/ 
+#include "DEFINES.h"                                                                       /*  Includes all the variables used on the program*/
+
+
+/****************************************************************************************************************************/
+/*__________________________________________________SUB_ROUTINES____________________________________________________________*/
+/****************************************************************************************************************************/
+void LDRRead();                                                                            /* Function that reads the data from LDR from digital input GPIO */
+void checkReadsLDR(char* taskName);                                                        /* Function that checkf if any reads failed and exit early (to try again) */
+
+
+/****************************************************************************************************************************/
+/*____________________________________________________TASK_FUNCTION_________________________________________________________*/
+/****************************************************************************************************************************/
+void T_LDRReadTask(void* parameter)                                                       /* Main function of the LDRReadTask */
+{
+  for(;;)
+  {
+    char* taskName = "LDRReadTask";                                                       /* Task name for dataLog function */
+
+    delay(tc_taskFunc_delay);
+
+    /*________TASK_SUB-ROUTINES___________*/                                              
+
+    LDRRead();                                                                            /* Sensor readings */
+
+    checkReadsLDR(taskName);                                                              /* Check sensor readings + dataLog (Task info)*/
+
+    /*____________________________________*/
+
+    delay(tc_taskFunc_delay);
+
+    vTaskDelay(pdMS_TO_TICKS(tc_quickTask_delay));                                        /* Delay the task */
+
+  }
+
+}
+
+//__TASK_SUB-ROUTINES__
+
+
+/****************************************************************************************************************************/
+/*___________________________________________________SHT_21_READ_FUNCTION___________________________________________________*/
+/****************************************************************************************************************************/
+void LDRRead()                                                                            /*  Function that reads the data from LDR via digital input from GPIO */
+{
+
+  v_lightIntensityValue = digitalRead(pin_LDRSensorPin);
+
+  const int tc_LDR_SensorTaskMeasure_timeStamp = 100;                                     /*  declare 2 seconds necesary for proper seonsor readings) */
+  delay(tc_LDR_SensorTaskMeasure_timeStamp);                                              /*  measurement delay for sensor measurement  */
+
+}
+
+/****************************************************************************************************************************/
+/*___________________________________________________CHECK_READS_FUNCTION___________________________________________________*/
+/****************************************************************************************************************************/
+void checkReadsLDR(char* taskName)                                                        /* Function that checks if any reads failed and exit early (to try again) */
+{
+
+  if (isnan(v_humidityValue))                                                             /* Check if any reads failed and exit early (to try again) */
+    {
+      Serial.println("[#] LDRReadTask() : Failed to read from LDR !");
+      return;                                                                             /* Try again ! */
+    } 
+    else 
+    {
+      dataLog(taskName, p_LDRReadTask);                                                   /* Task info */
+      Serial.println(" -> Running OK ");      
+    }
+
+}
+
+/****************************************************************************************************************************/
+
+#endif                                                                                    /* LDR_TASK_FUNCTIONS */
+
+

@@ -11,7 +11,7 @@
 #_____________________________________________________IMPORT_LIBRARIES__________________________________________________________#
 import paho.mqtt.client as mqtt
 import time
-
+import traceback
 #_______________________________________________________________________________________________________________________________#
 #______________________________________________________IMPORT MODULES___________________________________________________________#
 from mqtt_dictionary import mqtt_dictionary                     # Module that stores the most important info about MQTT Client status.                  
@@ -31,6 +31,7 @@ from mqtt_topic_subscribe import mqtt_topic_subscribe           # Module that ha
 
 class mqtt_on_connect():
 
+    # --> CALLBACK FUNCTION: on_connect: On connect the client will subscribe to the topics.
     def on_connect(client,userdata,flags,rc):
         try:
             if rc == 0:
@@ -63,6 +64,12 @@ class mqtt_on_connect():
 
         except Exception as e:
             print(f" <!> [mqtt_on_connect]  Could not connect. {e}     ")
+            #############################################################
+            #|                         ERROR LOG                       |#
+            #############################################################
+            if not (isinstance(e, TypeError) and "'NoneType' object" in str(e)):
+                with open("exceptions_main.log", "a") as logfile:
+                    traceback.print_exc(file=logfile)
 
 #_______________________________________________________________________________________________________________________________#
 #________________________________________________________RETURN_AREA____________________________________________________________#

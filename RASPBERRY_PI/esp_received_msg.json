@@ -1,10 +1,12 @@
 {
-    "esp32/no.1/roomTemp": "25.38",
-    "esp32/no.1/airHum": "35.72",
-    "esp32/no.1/sysState": "COOLING",
-    "RaspPi/esp32/no.1/temperatureControl": "21",
+    "esp32/no.1/roomTemp": "23.20",
+    "esp32/no.1/airHum": "49.50",
+    "esp32/no.1/sysState": "OFF",
+    "esp32/no.1/airQuality": " ",
+    "esp32/no.1/airPressure": "996.70",
+    "RaspPi/esp32/no.1/temperatureControl": "23.5",
     "RaspPi/esp32/no.1/outputRed": " ",
     "RaspPi/esp32/no.1/Reset": " ",
-    "RaspPi/esp32/no.1/setLocation": "Iasi",
-    "RaspPi/esp32/no.1/getOutsideTemperature": "16"
+    "RaspPi/esp32/no.1/setLocation": "  ",
+    "RaspPi/esp32/no.1/getOutsideTemperature": "19"
 }

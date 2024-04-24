@@ -27,6 +27,19 @@
 #     MQTT_TOPIC = 
 #     MQTT_TOPIC_SEND =
 #     print(f"[mqtt_topic_connect]][]   Failed to subscribe to topics: {MQTT_TOPIC, MQTT_TOPIC_SEND}. {e}    <!>") 
+# 
+# except TimeoutError :
+#     print(f" <!> [mqtt_topic_connect][outsideTemp] --> TimeoutError <!>")
+#     pass
+#
+# except BlockingIOError:
+#     print(f" <!> [mqtt_topic_connect][outsideTemp]--> BlockingIOError  <!>")
+#     pass
+#
+# except None as e:
+#     print(f" <!> [mqtt_topic_connect][outsideTemp] Passed on None type error <!>")
+#     pass
+#
 #
 # --> MQTT QoS: 0, 1, 2 (Quality of Service):
 #
@@ -41,6 +54,7 @@
 import paho.mqtt.client as mqtt
 import time
 import json
+import asyncio
 
 
 #_______________________________________________________________________________________________________________________________#
@@ -48,6 +62,7 @@ import json
 from mqtt_dictionary   import mqtt_dictionary       # Dictionaty containing MQTT RC Codes
 from mqtt_raspi_status import mqtt_raspi_status     # Class that contains functions that are retriving data from RaspPi
 from mqtt_on_message   import mqtt_on_message       # Class that handles the reciving the messages and esp_received_msg.json
+from get_outside_temp  import get_outside_temp
 
 #_______________________________________________________________________________________________________________________________#
 #_____________________________________________________GLOBAL_VARIABLES__________________________________________________________#
@@ -56,31 +71,35 @@ from mqtt_on_message   import mqtt_on_message       # Class that handles the rec
 
 # a) Module 3 -RaspberryPi 4 TOPICS:
 
-MQTT_TOPIC_CHECK_STATUS         = 'RaspPi/ScriptConToMQTT'
-MQTT_TOPIC_WIFI                 = 'RaspPi/WiFiStatus'
-MQTT_TOPIC_TIME                 = 'RaspPi/CurrentTime'
+MQTT_TOPIC_CHECK_STATUS             = 'RaspPi/ScriptConToMQTT'                                      # (Checks status from RPI)     (Sends status to dashboard)
+MQTT_TOPIC_WIFI                     = 'RaspPi/WiFiStatus'                                           # (Recives wifi status)         (Sends wifi status to dashboard)
+MQTT_TOPIC_TIME                     = 'RaspPi/CurrentTime'                                          # (Recives time)                (Sends time to dashboard)
 
 # b.1) Module 1 - ESP32/No.1 TOPICS:
 
-ESP1_TOPIC_TEMPERATURE          = 'esp32/no.1/roomTemp'
-ESP1_TOPIC_AIR_HUMIDITY         = 'esp32/no.1/airHum'
+ESP1_TOPIC_TEMPERATURE              = 'esp32/no.1/roomTemp'                                         # (Recives temp from esp)         (Sends temp to json)        
+ESP1_TOPIC_AIR_HUMIDITY             = 'esp32/no.1/airHum'                                           # (Recives airHum from esp)       (Sends airHum to json)
+ESP1_TOPIC_SYS_STATE                = 'esp32/no.1/sysState'                                         # (Recives sysState)     (Sends sysState)
+ESP1_TOPIC_TEMP_CONTROL             = 'esp32/no.1/temperatureControl'                               # (Recives tempCtrl)     (Sends tempCtrl)
+ESP1_TOPIC_OUTSIDE_TEMP_GET         = 'esp32/no.1/getOutsideTemp'                                   # (Recives temp from get_outside_temp function)  (ESP)
+ESP1_TOPIC_AIR_PRESS                = 'esp32/no.1/airPressure'                                     # (Recives airPressure)  (Sends airPressure)                  
 # ESP1_TOPIC_LED_CONTROL          = 'esp32/no.1/outputRed'
 # ESP1_TOPIC_RESET                = 'esp32/no.1/Reset'
-ESP1_TOPIC_SYS_STATE            = 'esp32/no.1/sysState'
-ESP1_TOPIC_TEMP_CONTROL         = 'esp32/no.1/temperatureControl'
 
 # b.2) Module 1 - ESP32/No.1 TOPICS to NodeRed Dashboard via RaspPi Python Program:
 
-RPI_ESP1_TOPIC_TEMPERATURE      = 'RaspPi/esp32/no.1/roomTemp'
-RPI_ESP1_TOPIC_AIR_HUMIDITY     = 'RaspPi/esp32/no.1/airHum'
+RPI_ESP1_TOPIC_TEMPERATURE          = 'RaspPi/esp32/no.1/roomTemp'                                  # (Recives temp from json)         (Sends temp to dashboard)
+RPI_ESP1_TOPIC_AIR_HUMIDITY         = 'RaspPi/esp32/no.1/airHum'                                    # (Recives airHum from json)       (Sends airHum to dashboard)
+RPI_ESP1_TOPIC_SYS_STATE            = 'RaspPi/esp32/no.1/sysState'                                  # (Recives sysState from json)                   (Sends sysState to dashboard)                              
+RPI_ESP1_TOPIC_TEMP_CONTROL         = 'RaspPi/esp32/no.1/temperatureControl'                        # (Recives tempCtrl from dashboard)              (Sends tempCtrl to json)     
+RPI_ESP1_TOPIC_SET_LOCATION         = 'RaspPi/esp32/no.1/setLocation'                               # (Recives location from dashboard)              (Sends location to get_outside_temp function)           
+RPI_ESP1_TOPIC_OUTSIDE_TEMP_GET     = 'RaspPi/esp32/no.1/getOutsideTemp'                            # (Recives temp from get_outside_temp function)  (Sends temp to dashboard and ESP)                       
+RPI_ESP1_TOPIC_AIR_PRESS            = 'RaspPi/esp32/no.1/airPressure'                               # (Recives airPressure from json)                (Sends airPressure to dashboard) 
 # RPI_ESP1_TOPIC_LED_CONTROL      = 'RaspPi/esp32/no.1/outputRed'
 # RPI_ESP1_TOPIC_RESET            = 'RaspPi/esp32/no.1/Reset'
-RPI_ESP1_TOPIC_SYS_STATE        = 'RaspPi/esp32/no.1/sysState'
-RPI_ESP1_TOPIC_TEMP_CONTROL     = 'RaspPi/esp32/no.1/temperatureControl'
 
 
 # --> GLOBAL VARIABLES:
-
 
 #_______________________________________________________________________________________________________________________________#
 #_______________________________________________________MAIN_FUNCTION___________________________________________________________#
@@ -91,15 +110,36 @@ class mqtt_topic_subscribe():                   # Class that realises the connec
 
     Function topic_subscribe(self,client,rc): is a function that subscribe to specific MQTT topics and then 
     takes the specific steps to read the data from the json and make connection between topics from the ESP 
-    or Node Red Dasboard or diretly from the server script to either ESP or Node Red Dashboard
-                                Server Script -> Topic -> Dashboard
+    or Node Red Dasboard or directly from the server script to either ESP or Node Red Dashboard
+                          Server Script -> Topic -> Dashboard
                           ESP -> Topic -> Server Script -> Topic -> Dashboard
                           Dashboard -> Topic -> Server Script -> Topic -> ESP
 
     """
+
     def topic_subscribe(self,client,rc):        # The self parameter represents the instance of the class.
 
+        mqtt_topic_subscribe.mqtt_topicSub_check_status(self,client,rc)        # Subscribes to the MQTT_TOPIC_CHECK_STATUS
+        mqtt_topic_subscribe.mqtt_topicSub_wifi_status(self,client,rc)        # Subscribes to the MQTT_TOPIC_WIFI
+        mqtt_topic_subscribe.mqtt_topicSub_current_time(self,client,rc)       # Subscribes to the MQTT_TOPIC_TIME
+        mqtt_topic_subscribe.mqtt_topicSub_room_temp(self,client,rc)          # Subscribes to the ESP1_TOPIC_TEMPERATURE
+        mqtt_topic_subscribe.mqtt_topicSub_air_humidity(self,client,rc)       # Subscribes to the ESP1_TOPIC_AIR_HUMIDITY
+        mqtt_topic_subscribe.mqtt_topicSub_sys_state(self,client,rc)          # Subscribes to the ESP1_TOPIC_SYS_STATE
+        mqtt_topic_subscribe.mqtt_topicSub_temp_control(self,client,rc)       # Subscribes to the ESP1_TOPIC_TEMP_CONTROL       
+        mqtt_topic_subscribe.mqtt_topicSub_outside_temp(self,client,rc)       # Subscribes to the RPI_ESP1_TOPIC_OUTSIDE_TEMP_GET
+        mqtt_topic_subscribe.mqtt_topicSub_air_Pressure(self,client,rc)       # Subscribes to the ESP1_TOPIC_AIR_PRESS
+
+#####################################################################################################################################
+#|                                                    RASPI RELATED TOPICS                                                         |#
+#####################################################################################################################################
+    '''
+            Server Script -> Topic -> Dashboard
+
+    '''
+
 #_______________________________________________________________________________________________________________________________#
+
+    def mqtt_topicSub_check_status(self,client,rc):        # The self parameter represents the instance of the class.
         
         # MQTT_TOPIC_CHECK_STATUS               *Server Script -> Topic -> Dashboard
         try:
@@ -133,8 +173,10 @@ class mqtt_topic_subscribe():                   # Class that realises the connec
 
         except Exception as e:
             MQTT_TOPIC = MQTT_TOPIC_CHECK_STATUS
-            print(f" <!> [mqtt_topic_connect][rpiStatus]   Failed to subscribe to topic: {MQTT_TOPIC, MQTT_TOPIC_SEND}. {e}   ") 
+            print(f" <!> [mqtt_topic_connect][rpiStatus]   Failed to subscribe to topic: {MQTT_TOPIC}. {e}   ") 
 #_______________________________________________________________________________________________________________________________#
+
+    def mqtt_topicSub_wifi_status(self,client,rc):         # The self parameter represents the instance of the class.
             
         # MQTT_TOPIC_WIFI                       *Server Script -> Topic -> Dashboard
         try:
@@ -170,6 +212,8 @@ class mqtt_topic_subscribe():                   # Class that realises the connec
             MQTT_TOPIC = MQTT_TOPIC_WIFI 
             print(f" <!> [mqtt_topic_connect][wifi]   Failed to subscribe to topic: {MQTT_TOPIC}. {e}   ") 
 #_______________________________________________________________________________________________________________________________#
+
+    def mqtt_topicSub_current_time(self,client,rc):        # The self parameter represents the instance of the class.
             
         # MQTT_TOPIC_TIME                       *Server Script -> Topic -> Dashboard
         try:
@@ -204,7 +248,16 @@ class mqtt_topic_subscribe():                   # Class that realises the connec
         except Exception as e:
             MQTT_TOPIC = MQTT_TOPIC_TIME 
             print(f" <!> [mqtt_topic_connect][rpiTime]]   Failed to subscribe to topic: {MQTT_TOPIC}. {e}   ") 
+       
+        #####################################################################################################################################
+        #|                                                    ESP32 RELATED TOPICS                                                         |#
+        #####################################################################################################################################
+        '''
+                ESP -> Topic -> Server Script -> Topic -> Dashboard
+        '''
 #_______________________________________________________________________________________________________________________________#
+
+    def mqtt_topicSub_room_temp(self,client,rc):           # The self parameter represents the instance of the class.
             
         # ESP1_TOPIC_TEMPERATURE                *ESP -> Topic -> Server Script -> Topic -> Dashboard
         try:
@@ -255,6 +308,8 @@ class mqtt_topic_subscribe():                   # Class that realises the connec
             MQTT_TOPIC_SEND     = RPI_ESP1_TOPIC_TEMPERATURE
             print(f" <!> [mqtt_topic_connect][roomTemp]   Failed to subscribe to topics: {MQTT_TOPIC, MQTT_TOPIC_SEND}. {e}   ") 
 #_______________________________________________________________________________________________________________________________#
+
+    def mqtt_topicSub_air_humidity(self,client,rc):        # The self parameter represents the instance of the class.
             
         # ESP1_TOPIC_AIR_HUMIDITY               *ESP -> Topic -> Server Script -> Topic -> Dashboard
         try:
@@ -305,79 +360,8 @@ class mqtt_topic_subscribe():                   # Class that realises the connec
             print(f" <!> [mqtt_topic_connect][airHum]   Failed to subscribe to topics: {MQTT_TOPIC, MQTT_TOPIC_SEND}. {e}   ") 
 
 #_______________________________________________________________________________________________________________________________#
-            
-        # # ESP1_TOPIC_LED_CONTROL              *ESP <- Topic <- Server Script <- Topic <- Dashboard
-        # try:
-        #     MQTT_TOPIC       = RPI_ESP1_TOPIC_LED_CONTROL
-        #     MQTT_TOPIC_SEND  = ESP1_TOPIC_LED_CONTROL
 
-        #     client.subscribe(MQTT_TOPIC,1)
-        #     client.subscribe(MQTT_TOPIC_SEND,1)
-
-        #     if rc == 0:
-        #         connectionReturnCodes = mqtt_dictionary.mqtt_dictionary()
-        #         print(f"[mqtt_topic_connect]   Subscribed to topic: {MQTT_TOPIC}, rc: {rc} - {connectionReturnCodes[rc]}.     <OK>")
-
-        #         try:
-        #                 try:
-        #                     with open("esp_received_msg.json", "r") as json_file:
-        #                         data = json.load(json_file)
-        #                         v_toggleLED = data["RaspPi/esp32/no.1/outputRed"]
-        #                         print(print(f"[mqtt_topic_connect]   Opened the JSON.     <OK>"))
-        #                 except Exception as e:
-        #                     print(print(f"[mqtt_topic_connect]  Failed to open the JSON.  {e}    <!>"))
-
-        #                 client.publish(MQTT_TOPIC_SEND,v_toggleLED)
-        #                 print(f"[mqtt_topic_connect][airHum]  Published to topic: {MQTT_TOPIC_SEND}.    <OK>")
-        #         except:
-        #                 connectionReturnCodes = mqtt_dictionary.mqtt_dictionary()
-        #                 print(f"[mqtt_topic_connect][airHum]  Failed to publish to topic: {MQTT_TOPIC_SEND}.     <!>")
-        
-        #     else:
-        #         connectionReturnCodes = mqtt_dictionary.mqtt_dictionary()
-        #         print(f"[mqtt_topic_connect]   Failed to subscribe to topic: {MQTT_TOPIC}, rc: {rc} - {connectionReturnCodes[rc]}.     <!>") 
-        # except Exception as e:
-        #     MQTT_TOPIC = RPI_ESP1_TOPIC_LED_CONTROL
-        #     print(f"[mqtt_topic_connect]   Failed to subscribe to topic: {MQTT_TOPIC}. {e}    <!>") 
-
-#_______________________________________________________________________________________________________________________________#
-                        
-        # # ESP1_TOPIC_RESET                    *ESP <- Topic <- Server Script <- Topic <- Dashboard
-        # try:
-        #     MQTT_TOPIC       = RPI_ESP1_TOPIC_RESET
-        #     MQTT_TOPIC_SEND  = ESP1_TOPIC_RESET                
-
-
-        #     client.subscribe(MQTT_TOPIC,1)
-        #     client.subscribe(MQTT_TOPIC_SEND,1)
-
-        #     if rc == 0:
-        #         connectionReturnCodes = mqtt_dictionary.mqtt_dictionary()
-        #         print(f"[mqtt_topic_connect]   Subscribed to topic: {MQTT_TOPIC}, rc: {rc} - {connectionReturnCodes[rc]}.     <OK>")
-
-        #         try:
-        #                 try:
-        #                     with open("esp_received_msg.json", "r") as json_file:
-        #                         data = json.load(json_file)
-        #                         v_toggleReset= data["RaspPi/esp32/no.1/Reset"]
-        #                         print(print(f"[mqtt_topic_connect]   Opened the JSON.     <OK>"))
-        #                 except Exception as e:
-        #                     print(print(f"[mqtt_topic_connect]  Failed to open the JSON.  {e}    <!>"))
-
-        #                 client.publish(MQTT_TOPIC_SEND,v_toggleReset)
-        #                 print(f"[mqtt_topic_connect][airHum]  Published to topic: {MQTT_TOPIC_SEND}.    <OK>")
-        #         except:
-        #                 connectionReturnCodes = mqtt_dictionary.mqtt_dictionary()
-        #                 print(f"[mqtt_topic_connect][airHum]  Failed to publish to topic: {MQTT_TOPIC_SEND}.     <!>")
-        
-        #     else:
-        #         connectionReturnCodes = mqtt_dictionary.mqtt_dictionary()
-        #         print(f"[mqtt_topic_connect]   Failed to subscribe to topic: {MQTT_TOPIC}, rc: {rc} - {connectionReturnCodes[rc]}.     <!>") 
-        # except Exception as e:
-        #     MQTT_TOPIC = RPI_ESP1_TOPIC_LED_CONTROL
-        #     print(f"[mqtt_topic_connect]   Failed to subscribe to topic: {MQTT_TOPIC}. {e}    <!>") 
-
-#_______________________________________________________________________________________________________________________________#
+    def mqtt_topicSub_sys_state(self,client,rc):           # The self parameter represents the instance of the class.  
                      
         # ESP1_TOPIC_SYS_STATE                  *ESP -> Topic -> Server Script -> Topic -> Dashboard
         try:
@@ -428,6 +412,146 @@ class mqtt_topic_subscribe():                   # Class that realises the connec
             print(f" <!> [mqtt_topic_connect][sysState]   Failed to subscribe to topics: {MQTT_TOPIC, MQTT_TOPIC_SEND}. {e}   ") 
 
 #_______________________________________________________________________________________________________________________________#
+
+    def mqtt_topicSub_air_Pressure(self,client,rc):        # The self parameter represents the instance of the class.  
+                        
+            # ESP1_TOPIC_AIR_PRESS                 *ESP -> Topic -> Server Script -> Topic -> Dashboard
+            try:
+                MQTT_TOPIC          = ESP1_TOPIC_AIR_PRESS 
+                MQTT_TOPIC_SEND     = RPI_ESP1_TOPIC_AIR_PRESS 
+
+                client.subscribe(MQTT_TOPIC,2)
+                client.subscribe(MQTT_TOPIC_SEND,2)
+
+                if rc == 0:
+                    connectionReturnCodes = mqtt_dictionary.mqtt_dictionary()
+                    print(f" <OK> [mqtt_topic_connect][airPressure]   Subscribed to topics: {MQTT_TOPIC, MQTT_TOPIC_SEND}, rc: {rc} - {connectionReturnCodes[rc]}.    ")
+            
+                    try:
+                        try:    
+                            with open("esp_received_msg.json","r") as json_file_airPressure:
+                                data_airPressure = json.load(json_file_airPressure)
+                                v_airPressureValue = data_airPressure["esp32/no.1/airPressure"]
+                                print(f" <OK> [mqtt_topic_connect][airPressure]   Opened the JSON.    ")
+                        except Exception as e:
+                            print(print(f" <!> [mqtt_topic_connect][airPressure]   Failed to open the JSON.  {e}   "))
+
+                        client.publish(MQTT_TOPIC_SEND, v_airPressureValue)
+                        print(f" <OK> [mqtt_topic_connect][airPressure][publish]  Published to topic: {MQTT_TOPIC_SEND} :{v_airPressureValue}.   ")
+                    except:
+                        connectionReturnCodes = mqtt_dictionary.mqtt_dictionary()
+                        print(f" <!> [mqtt_topic_connect][airPressure][publish]  Failed to publish to topic: {MQTT_TOPIC_SEND}.    ")
+            
+                else:
+                    connectionReturnCodes = mqtt_dictionary.mqtt_dictionary()
+                    print(f" <!> [mqtt_topic_connect][airPressure]   Failed to subscribe to topics: {MQTT_TOPIC, MQTT_TOPIC_SEND}, rc: {rc} - {connectionReturnCodes[rc]}.    ")
+
+            except TimeoutError :
+                print(f" <!> [mqtt_topic_connect][airPressure] --> TimeoutError <!>")
+                pass
+
+            except BlockingIOError:
+                print(f" <!> [mqtt_topic_connect][airPressure] --> BlockingIOError  <!>")
+                pass
+
+            except None as e:
+                print(f" <!> [mqtt_topic_connect][airPressure] Passed on None type error <!>")
+                pass
+    
+            except Exception as e:
+                MQTT_TOPIC          = ESP1_TOPIC_AIR_PRESS
+                MQTT_TOPIC_SEND     = RPI_ESP1_TOPIC_AIR_PRESS
+                print(f" <!> [mqtt_topic_connect][airPressure]   Failed to subscribe to topics: {MQTT_TOPIC, MQTT_TOPIC_SEND}. {e}   ") 
+
+        
+#####################################################################################################################################
+#|                                                DASHBOARD RELATED TOPICS                                                         |#
+#####################################################################################################################################
+    '''
+            Dashboard -> Topic -> Server Script -> Topic -> ESP
+    '''
+#_______________________________________________________________________________________________________________________________#
+            
+        # ESP1_TOPIC_LED_CONTROL              *ESP <- Topic <- Server Script <- Topic <- Dashboard
+
+    # def mqtt_topicSub_led_control(self,client,rc):        # The self parameter represents the instance of the class.
+
+    #     try:
+    #         MQTT_TOPIC       = RPI_ESP1_TOPIC_LED_CONTROL
+    #         MQTT_TOPIC_SEND  = ESP1_TOPIC_LED_CONTROL
+
+    #         client.subscribe(MQTT_TOPIC,1)
+    #         client.subscribe(MQTT_TOPIC_SEND,1)
+
+    #         if rc == 0:
+    #             connectionReturnCodes = mqtt_dictionary.mqtt_dictionary()
+    #             print(f"[mqtt_topic_connect]   Subscribed to topic: {MQTT_TOPIC}, rc: {rc} - {connectionReturnCodes[rc]}.     <OK>")
+
+    #             try:
+    #                     try:
+    #                         with open("esp_received_msg.json", "r") as json_file:
+    #                             data = json.load(json_file)
+    #                             v_toggleLED = data["RaspPi/esp32/no.1/outputRed"]
+    #                             print(print(f"[mqtt_topic_connect]   Opened the JSON.     <OK>"))
+    #                     except Exception as e:
+    #                         print(print(f"[mqtt_topic_connect]  Failed to open the JSON.  {e}    <!>"))
+
+    #                     client.publish(MQTT_TOPIC_SEND,v_toggleLED)
+    #                     print(f"[mqtt_topic_connect][airHum]  Published to topic: {MQTT_TOPIC_SEND}.    <OK>")
+    #             except:
+    #                     connectionReturnCodes = mqtt_dictionary.mqtt_dictionary()
+    #                     print(f"[mqtt_topic_connect][airHum]  Failed to publish to topic: {MQTT_TOPIC_SEND}.     <!>")
+        
+    #         else:
+    #             connectionReturnCodes = mqtt_dictionary.mqtt_dictionary()
+    #             print(f"[mqtt_topic_connect]   Failed to subscribe to topic: {MQTT_TOPIC}, rc: {rc} - {connectionReturnCodes[rc]}.     <!>") 
+    #     except Exception as e:
+    #         MQTT_TOPIC = RPI_ESP1_TOPIC_LED_CONTROL
+    #         print(f"[mqtt_topic_connect]   Failed to subscribe to topic: {MQTT_TOPIC}. {e}    <!>") 
+
+#_______________________________________________________________________________________________________________________________#
+                        
+        # ESP1_TOPIC_RESET                    *ESP <- Topic <- Server Script <- Topic <- Dashboard
+
+    # def mqtt_topicSub_reset(self,client,rc):              # The self parameter represents the instance of the class.
+
+    #     try:
+    #         MQTT_TOPIC       = RPI_ESP1_TOPIC_RESET
+    #         MQTT_TOPIC_SEND  = ESP1_TOPIC_RESET                
+
+
+    #         client.subscribe(MQTT_TOPIC,1)
+    #         client.subscribe(MQTT_TOPIC_SEND,1)
+
+    #         if rc == 0:
+    #             connectionReturnCodes = mqtt_dictionary.mqtt_dictionary()
+    #             print(f"[mqtt_topic_connect]   Subscribed to topic: {MQTT_TOPIC}, rc: {rc} - {connectionReturnCodes[rc]}.     <OK>")
+
+    #             try:
+    #                     try:
+    #                         with open("esp_received_msg.json", "r") as json_file:
+    #                             data = json.load(json_file)
+    #                             v_toggleReset= data["RaspPi/esp32/no.1/Reset"]
+    #                             print(print(f"[mqtt_topic_connect]   Opened the JSON.     <OK>"))
+    #                     except Exception as e:
+    #                         print(print(f"[mqtt_topic_connect]  Failed to open the JSON.  {e}    <!>"))
+
+    #                     client.publish(MQTT_TOPIC_SEND,v_toggleReset)
+    #                     print(f"[mqtt_topic_connect][airHum]  Published to topic: {MQTT_TOPIC_SEND}.    <OK>")
+    #             except:
+    #                     connectionReturnCodes = mqtt_dictionary.mqtt_dictionary()
+    #                     print(f"[mqtt_topic_connect][airHum]  Failed to publish to topic: {MQTT_TOPIC_SEND}.     <!>")
+        
+    #         else:
+    #             connectionReturnCodes = mqtt_dictionary.mqtt_dictionary()
+    #             print(f"[mqtt_topic_connect]   Failed to subscribe to topic: {MQTT_TOPIC}, rc: {rc} - {connectionReturnCodes[rc]}.     <!>") 
+    #     except Exception as e:
+    #         MQTT_TOPIC = RPI_ESP1_TOPIC_LED_CONTROL
+    #         print(f"[mqtt_topic_connect]   Failed to subscribe to topic: {MQTT_TOPIC}. {e}    <!>") 
+              
+#_______________________________________________________________________________________________________________________________#
+
+    def mqtt_topicSub_temp_control(self,client,rc):         # The self parameter represents the instance of the class.
             
         # ESP1_TOPIC_TEMP_CONTROL              *Dashboard -> Topic -> Server Script -> Topic -> ESP
         try:
@@ -478,9 +602,68 @@ class mqtt_topic_subscribe():                   # Class that realises the connec
             MQTT_TOPIC_SEND = RPI_ESP1_TOPIC_TEMP_CONTROL
             print(f" <!> [mqtt_topic_connect][tempCtrl]   Failed to subscribe to topics: {MQTT_TOPIC, MQTT_TOPIC_SEND}. {e}  ") 
        
-
 #_______________________________________________________________________________________________________________________________#
+        # RPI_ESP1_TOPIC_OUTSIDE_TEMP         *Dashboard -> Topic -> Server Script -> Topic -> ESP
+        #                                    (Input location)       (Looks for temp)      (Controls temp)
+
+    def mqtt_topicSub_outside_temp(self,client,rc):         # The self parameter represents the instance of the class.
+
+        try:
+
+            MQTT_TOPIC_SET = RPI_ESP1_TOPIC_SET_LOCATION
+            MQTT_TOPIC_GET = RPI_ESP1_TOPIC_OUTSIDE_TEMP_GET
+            MQTT_TOPIC_SEND = ESP1_TOPIC_OUTSIDE_TEMP_GET
+
+            client.subscribe(MQTT_TOPIC_SET,2)
+            client.subscribe(MQTT_TOPIC_GET,2)
+            client.subscribe(MQTT_TOPIC_SEND,2)
+
+            if rc == 0:
+
+                connectionReturnCodes = mqtt_dictionary.mqtt_dictionary()
+                print(f" <OK> [mqtt_topic_connect][outsideTemp]   Subscribed to topic: {MQTT_TOPIC_SET, MQTT_TOPIC_GET}, rc: {rc} - {connectionReturnCodes[rc]}.     ")
+
+
+                try:    
+                    with open("esp_received_msg.json","r") as json_file_setLocation:
+                        data_setLocation = json.load(json_file_setLocation)
+                        location = data_setLocation["RaspPi/esp32/no.1/setLocation"]
+                        print(f" <OK> [mqtt_topic_connect][outsideTemp]   Opened the JSON.    ")
+                except Exception as e:
+                        print(print(f" <!> [mqtt_topic_connect][outsideTemp]   Failed to open the JSON.  {e}   "))
+
+                if location != None:                                                                                                  # If the location is not None
+                    handle_outiside_temp = mqtt_raspi_status()                                                                        # Create an instance 
+                    handle_outiside_temp.get_outside_temperature_status(client,MQTT_TOPIC_GET,MQTT_TOPIC_SEND,location)               # Call the method on the instance
+                else:
+                    print(f"[mqtt_topic_connect][outsideTemp][DEBUG_MSG]: PASSED UPON LOCATION CHANGE & GET OUT TEMP, LOCATION IT`S NONE.")
+                    pass
+
+            else:
+                connectionReturnCodes = mqtt_dictionary.mqtt_dictionary()
+                print(f" <!> [mqtt_topic_connect][outsideTemp][publish]   Failed to subscribe to topic: {MQTT_TOPIC_SET, MQTT_TOPIC_GET, MQTT_TOPIC_SEND}, rc: {rc} - {connectionReturnCodes[rc]}.    ") 
+
+        except TimeoutError :
+            print(f" <!> [mqtt_topic_connect][outsideTemp] --> TimeoutError <!>")
+            pass
+
+        except BlockingIOError:
+            print(f" <!> [mqtt_topic_connect][outsideTemp]--> BlockingIOError  <!>")
+            pass
+
+        except None as e:
+            print(f" <!> [mqtt_topic_connect][outsideTemp] Passed on None type error <!>")
+            pass
+
+        except Exception as e:
+            MQTT_TOPIC      = ESP1_TOPIC_TEMP_CONTROL
+            MQTT_TOPIC_SEND = RPI_ESP1_TOPIC_TEMP_CONTROL
+            print(f" <!> [mqtt_topic_connect][outsideTemp]   Failed to subscribe to topics: {MQTT_TOPIC, MQTT_TOPIC_SEND}. {e}  ") 
+#_______    ________________________________________________________________________________________________________________________#
 #________________________________________________________RETURN_AREA____________________________________________________________#
 
 #_______________________________________________________________________________________________________________________________#
 #________________________________________________________ DEBUG_AREA____________________________________________________________#
+if __name__ == "__main__":      # Main function that is executed when the script is run
+    pass
+#_______________________________________________________________________________________________________________________________#

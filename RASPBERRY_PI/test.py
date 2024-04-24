@@ -34,7 +34,7 @@ while True:
     # Loop to keep the script running and processing MQTT messages
     nr = nr +1
     time.sleep(1)
-    client.loop_forever()
+    client.loop()
 
 
 # import paho.mqtt.client as mqtt  #import the client1
