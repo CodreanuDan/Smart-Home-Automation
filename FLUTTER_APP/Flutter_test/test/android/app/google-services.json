@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "362539034942",
+    "firebase_url": "https://smart-home-iot-codreanu-dan-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "smart-home-iot-codreanu-dan",
+    "storage_bucket": "smart-home-iot-codreanu-dan.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:362539034942:android:9d62b9b3d71f418b9aa46f",
+        "android_client_info": {
+          "package_name": "com.example.test"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "362539034942-telr2fp6v1jg4m93ds8rdaif1gaiijll.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCTJFkYM3LKEt1isl3R7R2fHe7vvhv9LBE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "362539034942-a513nedoc0q3ib56lilvgkms69psm8pp.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
