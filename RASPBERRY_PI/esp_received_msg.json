@@ -1,12 +1,15 @@
 {
-    "esp32/no.1/roomTemp": "23.20",
-    "esp32/no.1/airHum": "49.50",
+    "esp32/no.1/roomTemp": "24.50",
+    "esp32/no.1/airHum": "44.60",
     "esp32/no.1/sysState": "OFF",
-    "esp32/no.1/airQuality": " ",
-    "esp32/no.1/airPressure": "996.70",
-    "RaspPi/esp32/no.1/temperatureControl": "23.5",
+    "esp32/no.1/airPressure": "991.20",
+    "esp32/no.1/IAQ": "2.67",
+    "esp32/no.1/eCO2": "545.79",
+    "esp32/no.1/TVOC": "0.68",
+    "esp32/no.1/EtOH": "0.36",
+    "RaspPi/esp32/no.1/temperatureControl": "24.5",
     "RaspPi/esp32/no.1/outputRed": " ",
     "RaspPi/esp32/no.1/Reset": " ",
-    "RaspPi/esp32/no.1/setLocation": "  ",
-    "RaspPi/esp32/no.1/getOutsideTemperature": "19"
+    "RaspPi/esp32/no.1/setLocation": " ",
+    "RaspPi/esp32/no.1/getOutsideTemperature": "22"
 }
