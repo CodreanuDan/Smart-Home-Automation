@@ -152,10 +152,10 @@ volatile uint8_t display_increment = 0;/* increment the display state */
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);/* Initialize the OLED display using Wire library */
 
 /*******************_OLED_DISPLAY_STATE_MACHINE_DATA_******************************/
-const int NUM_ITEMS = 4; // number of items in the list and also the number of screenshots and screenshots with QR codes (other screens)
+const int NUM_ITEMS = 4; 
 
 const char *menu_items [NUM_ITEMS] =
-{ // array with item names
+{ 
   "Welcome",
   "Conectivitate",
   "Termostat",
