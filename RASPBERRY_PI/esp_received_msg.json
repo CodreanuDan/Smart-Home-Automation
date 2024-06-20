@@ -7,9 +7,9 @@
     "esp32/no.1/eCO2": "545.79",
     "esp32/no.1/TVOC": "0.68",
     "esp32/no.1/EtOH": "0.36",
-    "RaspPi/esp32/no.1/temperatureControl": "24.5",
+    "RaspPi/esp32/no.1/temperatureControl": "22.5",
     "RaspPi/esp32/no.1/outputRed": " ",
     "RaspPi/esp32/no.1/Reset": " ",
-    "RaspPi/esp32/no.1/setLocation": " ",
-    "RaspPi/esp32/no.1/getOutsideTemperature": "22"
+    "RaspPi/esp32/no.1/setLocation": "  ",
+    "RaspPi/esp32/no.1/getOutsideTemperature": " "
 }

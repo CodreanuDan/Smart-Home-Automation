@@ -18,6 +18,7 @@ import paho.mqtt.client as mqtt
 import time
 import threading
 import traceback
+import json                                              
 
 
 #_______________________________________________________________________________________________________________________________#
@@ -26,8 +27,7 @@ from mqtt_on_connect import mqtt_on_connect             # Module that handles th
 from mqtt_on_message import mqtt_on_message             # Module that handles the callback function of the MQTT Client for when a PUBLISH message is received from the server.)
 from mqtt_dictionary import mqtt_dictionary             # Module that stores the most important info about MQTT Client status.
 from on_message_json_dump import on_message_json_dump   # Module that handles the callback function of the MQTT Client for when a PUBLISH message is received from the server and dumps the message in JSON format.     
-import json                                             # Module that handles the JSON format.  
-
+from mqtt_firebase_handler import mqtt_firebase_handler # Module that handles the communication with the firebase realtime database server.
 #_______________________________________________________________________________________________________________________________#
 #_____________________________________________________GLOBAL_VARIABLES__________________________________________________________#
 BUFFER_SIZE = 32768                                     # Buffer size for the MQTT Client
@@ -57,6 +57,9 @@ class mqtt_connect():
             client.max_inflight_messages_set(BUFFER_SIZE)            # Set the buffer size for the client
 
             client.connected_flag = False                            # Create flag to verify connection to MQTT Broker.
+            
+            firebase_handler = mqtt_firebase_handler(client)         # Create an instance of mqtt_firebase_handler
+            firebase_handler.mqtt_fetch_data_from_firebase()         # Call the method on the instance
 
             ######################################################################################################################
             #|                                    ESTABLISH CONNECTION & START CLIENT LOOP                                      |#
@@ -85,7 +88,7 @@ class mqtt_connect():
                         
                     print(f" <OK> [mqtt_server][MAIN]   In Main Loop ")
 
-                    time.sleep(5)                                                   # Delay for client loop, best > 2 seconds.
+                    time.sleep(6)                                                   # Delay for client loop, best > 2 seconds.
                     print("_____________________________________\n")
                     print('\n')
 
@@ -184,8 +187,7 @@ class mqtt_connect():
     #|                                   ESTABLISH CONNECTION & START CLIENT LOOP FUNCTION CALL                                        |#
     #####################################################################################################################################
     mqtt_server_connection()
-
-
+    
 
 #_______________________________________________________________________________________________________________________________#
 #________________________________________________________RETURN_AREA____________________________________________________________#
@@ -193,5 +195,6 @@ class mqtt_connect():
 #_______________________________________________________________________________________________________________________________#
 #________________________________________________________ DEBUG_AREA____________________________________________________________#
 if __name__ == "__main__":
+    # firbease_handler = mqtt_firebase_handler.mqtt_fetch_data_from_firebase()
     server_object = mqtt_connect.mqtt_server_connection()
     

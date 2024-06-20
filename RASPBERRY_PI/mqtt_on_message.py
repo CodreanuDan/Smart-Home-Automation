@@ -72,6 +72,27 @@ class mqtt_on_message():
                         jsonDumperAirPressure = on_message_json_dump()
                         jsonDumperAirPressure.json_dump_airPressure(msg)
 
+                    #  TOPIC: "esp32/no.1/IAQ"
+                    elif message_topic == "esp32/no.1/IAQ":
+                        jsonDumperIAQ = on_message_json_dump()
+                        jsonDumperIAQ.json_dump_IAQ(msg)
+                    
+                    #  TOPIC: "esp32/no.1/eCO2"
+                    elif message_topic == "esp32/no.1/eCO2":
+                        jsonDumperECO2 = on_message_json_dump()
+                        jsonDumperECO2.json_dump_eCO2(msg)
+                    
+                    #  TOPIC: "esp32/no.1/TVOC"
+                    elif message_topic == "esp32/no.1/TVOC":
+                        jsonDumperTVOC = on_message_json_dump()
+                        jsonDumperTVOC.json_dump_TVOC(msg)
+
+                    #  TOPIC: "esp32/no.1/EtOH"
+                    elif message_topic == "esp32/no.1/EtOH":
+                        jsonDumperEtOH = on_message_json_dump()
+                        jsonDumperEtOH.json_dump_EtOH(msg)
+
+
                         """
                         JSON handlers for coming from DASHBOARD to RaspPI : Dashboard --> Topic --> RaspPI Python program --> JSON
                         Dumps received message from topic to json file : esp_received_msg.json

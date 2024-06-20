@@ -25,6 +25,32 @@ import time
 class on_message_json_dump():
     
     """
+    JSON handlers for coming from FIREBASE to RaspPI : FIREBASE --> RaspPI Python program --> JSON
+    Dumps received message from topic to json file : esp_received_msg.json
+
+    """
+    def json_dump_tempCtrl_firebase(self, tempCtrl_data):
+        
+        try:
+            with open("esp_received_msg.json","r") as json_file_firebase_r:
+                data_firebase = json.load(json_file_firebase_r)
+                target_msg_firebase = data_firebase["RaspPi/esp32/no.1/temperatureControl"] = tempCtrl_data
+
+                print(f" <OK> [mqtt_on_message][firebase]   Opened JSON for firebase!      ")
+                
+                try:
+                    with open("esp_received_msg.json","w") as json_file_firebase_w:
+                        if target_msg_firebase != None:
+                            json.dump(data_firebase, json_file_firebase_w, indent = 4)
+                            print(f" <OK> [mqtt_on_message][firebase]   Dumped into JSON for firebase!  {data_firebase}    ")
+                        elif target_msg_firebase == None:
+                            print(f" <!> [mqtt_on_message][firebase]   Received None Type message!  {data_firebase}    ")
+                except Exception as e:
+                    print(f" <!> [mqtt_on_message][firebase]   Could not dump JSON for firebase!  {e}    ")
+        except Exception as e:
+            print(f" <!> [mqtt_on_message][firebase]   Could not open JSON for firebase!  {e}    ")
+    
+    """
     JSON handlers for topics coming from ESP to RaspPI : ESP --> Topic --> RaspPI Python program --> JSON
     Dumps received message from topic to json file : esp_received_msg.json
 
@@ -119,54 +145,101 @@ class on_message_json_dump():
         except Exception as e:
                 print(f" <!> [mqtt_on_message][airPressure]   Could not open JSON for airPressure!  {e}    ")
 
+    # json dump for airQuality
+    def json_dump_IAQ(self,msg):
+
+        try:
+            with open("esp_received_msg.json","r") as json_file_IAQ_r:
+                data_IAQ = json.load(json_file_IAQ_r)
+                target_msg_IAQ = data_IAQ["esp32/no.1/IAQ"] = msg.payload.decode("utf-8")
+
+                print(f" <OK> [mqtt_on_message][IAQ]   Opened JSON for IAQ!      ")
+
+                try:
+                    with open("esp_received_msg.json","w") as json_file_IAQ_w:
+                        if target_msg_IAQ != None:
+                            json.dump(data_IAQ, json_file_IAQ_w, indent = 4)
+                            print(f" <OK> [mqtt_on_message][IAQ]   Dumped into JSON for IAQ!  {data_IAQ}    ")
+                        elif target_msg_IAQ == None:
+                            print(f" <!> [mqtt_on_message][IAQ]   Received None Type message!  {data_IAQ}    ")
+                except Exception as e:
+                    print(f" <!> [mqtt_on_message][IAQ]   Could not dump JSON for IAQ!  {e}    ")
+        except Exception as e:
+            print(f" <!> [mqtt_on_message][IAQ]   Could not open JSON for IAQ!  {e}    ")
+
+    # json dump for eCO2
+    def json_dump_eCO2(self,msg):
+
+        try:
+            with open("esp_received_msg.json","r") as json_file_eCO2_r:
+                data_eCO2 = json.load(json_file_eCO2_r)
+                target_msg_eCO2 = data_eCO2["esp32/no.1/eCO2"] = msg.payload.decode("utf-8")
+
+                print(f" <OK> [mqtt_on_message][eCO2]   Opened JSON for eCO2!      ")
+
+                try:
+                    with open("esp_received_msg.json","w") as json_file_eCO2_w:
+                        if target_msg_eCO2 != None:
+                            json.dump(data_eCO2, json_file_eCO2_w, indent = 4)
+                            print(f" <OK> [mqtt_on_message][eCO2]   Dumped into JSON for eCO2!  {data_eCO2}    ")
+                        elif target_msg_eCO2 == None:
+                            print(f" <!> [mqtt_on_message][eCO2]   Received None Type message!  {data_eCO2}    ")
+                except Exception as e:
+                    print(f" <!> [mqtt_on_message][eCO2]   Could not dump JSON for eCO2!  {e}    ")
+        except Exception as e:
+            print(f" <!> [mqtt_on_message][eCO2]   Could not open JSON for eCO2!  {e}    ")
+
+    # json dump for TVOC
+    def json_dump_TVOC(self,msg):
+
+        try:
+            with open("esp_received_msg.json","r") as json_file_TVOC_r:
+                data_TVOC = json.load(json_file_TVOC_r)
+                target_msg_TVOC = data_TVOC["esp32/no.1/TVOC"] = msg.payload.decode("utf-8")
+
+                print(f" <OK> [mqtt_on_message][TVOC]   Opened JSON for TVOC!      ")
+
+                try:
+                    with open("esp_received_msg.json","w") as json_file_TVOC_w:
+                        if target_msg_TVOC != None:
+                            json.dump(data_TVOC, json_file_TVOC_w, indent = 4)
+                            print(f" <OK> [mqtt_on_message][TVOC]   Dumped into JSON for TVOC!  {data_TVOC}    ")
+                        elif target_msg_TVOC == None:
+                            print(f" <!> [mqtt_on_message][TVOC]   Received None Type message!  {data_TVOC}    ")
+                except Exception as e:
+                    print(f" <!> [mqtt_on_message][TVOC]   Could not dump JSON for TVOC!  {e}    ")
+        except Exception as e:
+            print(f" <!> [mqtt_on_message][TVOC]   Could not open JSON for TVOC!  {e}    ")
+
+    # json dump for EtOH
+    def json_dump_EtOH(self,msg):
+
+        try:
+            with open("esp_received_msg.json","r") as json_file_EtOH_r:
+                data_EtOH = json.load(json_file_EtOH_r)
+                target_msg_EtOH = data_EtOH["esp32/no.1/EtOH"] = msg.payload.decode("utf-8")
+
+                print(f" <OK> [mqtt_on_message][EtOH]   Opened JSON for EtOH!      ")
+
+                try:
+                    with open("esp_received_msg.json","w") as json_file_EtOH_w:
+                        if target_msg_EtOH != None:
+                            json.dump(data_EtOH, json_file_EtOH_w, indent = 4)
+                            print(f" <OK> [mqtt_on_message][EtOH]   Dumped into JSON for EtOH!  {data_EtOH}    ")
+                        elif target_msg_EtOH == None:
+                            print(f" <!> [mqtt_on_message][EtOH]   Received None Type message!  {data_EtOH}    ")
+                except Exception as e:
+                    print(f" <!> [mqtt_on_message][EtOH]   Could not dump JSON for EtOH!  {e}    ")
+        except Exception as e:
+            print(f" <!> [mqtt_on_message][EtOH]   Could not open JSON for EtOH!  {e}    ")
+
+
     """
     JSON handlers for coming from DASHBOARD to RaspPI : Dashboard --> Topic --> RaspPI Python program --> JSON
     Dumps received message from topic to json file : esp_received_msg.json
 
     """
-
-    # json dump for resetButton
-    # def json_dump_resetButton(self,msg):
-
-        # try:    
-        #     with open("esp_received_msg.json", "r") as json_file:
-        #         data = json.load(json_file)
-        #         data['RaspPi/esp32/no.1/Reset'] = msg.payload.decode("utf-8")
-        #         print(f"[mqtt_on_message]   Opened JSON for ledOnOff!       <OK>")
-
-        #         try:
-        #             with open("esp_received_msg.json", "w") as json_file:
-        #                 json.dump(data, json_file, indent=4)
-        #                 time.sleep(0.5)
-        #                 newData = " "
-        #                 json.dump(newData, json_file, indent=4)
-        #                 print(f"[mqtt_on_message]   Dumped into JSON for ledOnOff!  {data}     <OK>")
-        #         except Exception as e:
-        #             print(f"[mqtt_on_message]   Could not dump JSON for ledOnOff!  {e}     <!>")
-
-        # except Exception as e:
-        #         print(f"[mqtt_on_message]   Could not open JSON for ledOnOff!  {e}     <!>")
-
-
-    # json dump for ledOnOff
-    # def json_dump_ledOnOff(self,msg):
-
-    #     try:    
-    #         with open("esp_received_msg.json", "r") as json_file:
-    #             data = json.load(json_file)
-    #             data["RaspPi/esp32/no.1/outputRed"] = msg.payload.decode("utf-8")
-    #             print(f"[mqtt_on_message]   Opened JSON for ledOnOff!       <OK>")
-
-    #             try:
-    #                 with open("esp_received_msg.json", "w") as json_file:
-    #                     json.dump(data, json_file, indent=4)
-    #                     print(f"[mqtt_on_message]   Dumped into JSON for ledOnOff!  {data}     <OK>")
-    #             except Exception as e:
-    #                 print(f"[mqtt_on_message]   Could not dump JSON for ledOnOff!  {e}     <!>")
-
-    #     except Exception as e:
-    #             print(f"[mqtt_on_message]   Could not open JSON for ledOnOff!  {e}     <!>")   
-          
+ 
     # json dump for tempCtrl
     def json_dump_tempCtrl(self,msg):
 
