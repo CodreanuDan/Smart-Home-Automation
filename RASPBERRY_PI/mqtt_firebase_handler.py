@@ -24,13 +24,13 @@ class mqtt_firebase_handler:
     def __init__(self, client):
         
         #------------Firebase-Connection----------------#
-        self.service_account_path = '/home/dan/SmartHome/service_account_path.json' # Path to service account key
+        self.service_account_path = '--empty--.json' # Path to service account key
         self.cred = credentials.Certificate(self.service_account_path)# Initialize the app with a service account, granting admin privileges
         firebase_admin.initialize_app(self.cred, {
-            'databaseURL' : 'https://smart-home-iot-codreanu-dan-default-rtdb.europe-west1.firebasedatabase.app/'  # project id
+            'databaseURL' : 'https://--empty--europe-west1.firebasedatabase.app/'  # project id
         })
         self.root = db.reference() # Reference to the root of your database
-        self.temp_ctrl_ref = self.root.child('NRD/ESP/TempCtrl')  # Get a reference to the 'NRD/ESP/TempCtrl' node
+        self.temp_ctrl_ref = self.root.child('node')  # Get a reference to the  node
         #----------------MQTT-Connection----------------#
         self.client = client
         self.MQTT_TOPIC_SEND = RPI_FIREBASE_TOPIC_TEMP_CONTROL
