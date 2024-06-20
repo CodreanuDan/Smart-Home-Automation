@@ -246,7 +246,7 @@ void TaskInitClass::espTaskCreate() /* Function that creates the tasks */
     delay(tc_objCreate_delay);
 
     /******************************************************************************************/
-    /* Controls the Heating. Calls shtReadTask() & toggleHeat(bool state).                    */
+    /* Controls the Heating. Calls SensorsReadTask() & toggleHeat(bool state).                */
     /* Can change the currentState between OFF <--> HEATING                                   */
     /******************************************************************************************/
     xTaskCreatePinnedToCore(
