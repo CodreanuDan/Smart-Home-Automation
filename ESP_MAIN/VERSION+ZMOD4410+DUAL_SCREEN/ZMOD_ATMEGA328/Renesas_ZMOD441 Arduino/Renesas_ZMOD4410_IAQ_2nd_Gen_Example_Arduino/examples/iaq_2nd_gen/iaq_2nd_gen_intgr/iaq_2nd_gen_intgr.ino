@@ -24,6 +24,9 @@
 
 SoftwareSerial mySerial(RX_PIN, TX_PIN); /* Creation of SoftwareSerial object */
 
+/***************************************************_STAT_DATA_*************************************************************/
+String sensor_status_data; /* String for data */
+
 /***************************************************_ZMOD_DATA_*************************************************************/
 
 #define ARDUINO /** < selection of Hardware Abstraction Layer */
@@ -52,8 +55,6 @@ float valF_result_IAQ;  /* Variable for IAQ result */
 void setup() /* Setup function */
 {
     /***************************************************************************************************************************/
-    /*                                              Start  communication                                                       */
-    /***************************************************************************************************************************/
     /* lib_ret -> Return of Library
     * api_ret -> Return of API
     */
@@ -74,6 +75,7 @@ void setup() /* Setup function */
         Serial.print(F("Error "));
         Serial.print(api_ret);
         Serial.println(F(" during init hardware, exiting program!\n"));
+        sensor_status_data = "Error";
         error_handle();
     }
 
@@ -89,6 +91,7 @@ void setup() /* Setup function */
         Serial.print(api_ret);
         Serial.println(
             F(" during reading sensor information, exiting program!\n"));
+        sensor_status_data = "Error";
         error_handle();
     }
 
@@ -98,6 +101,7 @@ void setup() /* Setup function */
         Serial.print(F("Error "));
         Serial.print(api_ret);
         Serial.println(F(" during preparation of the sensor, exiting program!\n"));
+        sensor_status_data = "Error";
         error_handle();
     }
 
@@ -107,6 +111,7 @@ void setup() /* Setup function */
         Serial.println(F("Error "));
         Serial.print(lib_ret);
         Serial.println(F(" during initializing algorithm, exiting program!"));
+        sensor_status_data = "Error";
         error_handle();
     }
 
@@ -115,6 +120,7 @@ void setup() /* Setup function */
         Serial.print(F("Error "));
         Serial.print(api_ret);
         Serial.println(F(" during starting measurement, exiting program!\n"));
+        sensor_status_data = "Error";
         error_handle();
     }
 }
@@ -161,6 +167,8 @@ void send_trough_UART() /* Function for sending ZMOD data trough UART with softw
     Serial.print(valF_result_TVOC);
     Serial.print("_");
     Serial.print(valF_result_IAQ);
+    Serial.print("_");
+    Serial.print(sensor_status_data);
     Serial.println();
 
     /**************************************************************************************************/
@@ -174,6 +182,8 @@ void send_trough_UART() /* Function for sending ZMOD data trough UART with softw
     mySerial.print(valF_result_TVOC);
     mySerial.print("_");
     mySerial.print(valF_result_IAQ);
+    mySerial.print("_");
+    mySerial.print(sensor_status_data);
     mySerial.println();
 }
 
@@ -201,6 +211,7 @@ void zmod_4410_measurement() /* Function for ZMOD4410 measurement */
             Serial.print(F("Error "));
             Serial.print(api_ret); /* Print error */
             Serial.println(F(" during read of sensor status, exiting program!\n"));
+            sensor_status_data = "Error";
             error_handle(); /* Handle error */
         }
         polling_counter++;                                                                                           /* Increment polling counter */
@@ -215,11 +226,13 @@ void zmod_4410_measurement() /* Function for ZMOD4410 measurement */
             Serial.print(F("Error "));
             Serial.print(api_ret); /* Print error */
             Serial.println(F(" during read of sensor status, exiting program!\n"));
+            sensor_status_data = "Error";
             error_handle(); /* Handle error */
         }
         Serial.print(F("Error"));
         Serial.print(ERROR_GAS_TIMEOUT); /* Print error */
         Serial.print(F(" exiting program!"));
+        sensor_status_data = "Error";
         error_handle(); /* Handle error */
     }
     else
@@ -233,6 +246,7 @@ void zmod_4410_measurement() /* Function for ZMOD4410 measurement */
         Serial.print(F("Error "));
         Serial.print(api_ret); /* Print error */
         Serial.println(F(" during read of ADC results, exiting program!\n"));
+        sensor_status_data = "Error";
         error_handle(); /* Handle error */
     }
 
@@ -241,6 +255,7 @@ void zmod_4410_measurement() /* Function for ZMOD4410 measurement */
     if ((lib_ret != IAQ_2ND_GEN_OK) && (lib_ret != IAQ_2ND_GEN_STABILIZATION)) /* If there is an error */
     {
         Serial.println(F("Error when calculating algorithm, exiting program!"));
+        sensor_status_data = "Error";
     }
     else
     {
@@ -251,6 +266,7 @@ void zmod_4410_measurement() /* Function for ZMOD4410 measurement */
       valF_result_TVOC = algo_results.tvoc;  /* Add TVOC result to variable */
       valF_result_eCO2 = algo_results.eco2;  /* Add eCO2 result to variable */
       valF_result_EtOH = algo_results.etoh;  /* Add EtOH result to variable */
+      sensor_status_data = "SensorOK";
 
       /***************************************************************************************************************************/
       /*|__________________________________________________SEND_TRHOUGH_UART____________________________________________________|*/

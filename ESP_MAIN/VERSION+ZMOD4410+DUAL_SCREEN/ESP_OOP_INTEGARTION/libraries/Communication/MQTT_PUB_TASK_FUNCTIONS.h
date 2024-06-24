@@ -97,20 +97,20 @@ void MQTTPublishing::MQTT_publishData() /* Subroutine for MQTT Communication res
 {
   Serial.println("<MQTT> Publish Data: ");
 
-  static char lastFinalTempStr[8] = ""; /* Static variables for storing the last published values */
-  static char lastFinalHumStr[8] = "";  /* Static variables for storing the last published values */
   static char lastPressStr[8] = "";     /* Static variables for storing the last published values */
   static char lastIAQStr[8] = "";       /* Static variables for storing the last published values */
   static char lasteCO2Str[8] = "";      /* Static variables for storing the last published values */
   static char lastTVOCStr[8] = "";      /* Static variables for storing the last published values */
   static char lastEtOHStr[8] = "";      /* Static variables for storing the last published values */
+  static char lastFinalTempStr[8] = ""; /* Static variables for storing the last published values */
+  static char lastFinalHumStr[8] = "";  /* Static variables for storing the last published values */
 
   /*********************************************************************/
   /*_____________________Final_Unified_Sensor_Data_____________________*/
   /*********************************************************************/
 
   char finalTempStr[8];
-  dtostrf(avgVal.v_final_temperatureValue, 1, 2, finalTempStr); /* Convert to char Final Temperature */
+  dtostrf(avgVal.v_final_temperatureValue, 1, 1, finalTempStr); /* Convert to char Final Temperature */
   if (strcmp(finalTempStr, lastFinalTempStr) != 0)
   {
     if (finalTempStr != 0)
@@ -122,7 +122,7 @@ void MQTTPublishing::MQTT_publishData() /* Subroutine for MQTT Communication res
   }
 
   char finalHumStr[8];
-  dtostrf(avgVal.v_final_humidityValue, 1, 2, finalHumStr); /* Convert to char Final Humidity */
+  dtostrf(avgVal.v_final_humidityValue, 1, 1, finalHumStr); /* Convert to char Final Humidity */
   if (strcmp(finalHumStr, lastFinalHumStr) != 0)
   {
     if (finalHumStr != 0)
@@ -137,7 +137,7 @@ void MQTTPublishing::MQTT_publishData() /* Subroutine for MQTT Communication res
   /*_______________________Air_pressure_data___________________________*/
   /*********************************************************************/
   char PressStr[8];
-  dtostrf(bmeData.v_bme_pressureValue, 1, 2, PressStr); /* Convert to char Final Pressure */
+  dtostrf(bmeData.v_bme_pressureValue, 1, 1, PressStr); /* Convert to char Final Pressure */
   if (strcmp(PressStr, lastPressStr) != 0)
   {
     if (PressStr != 0)
@@ -152,7 +152,7 @@ void MQTTPublishing::MQTT_publishData() /* Subroutine for MQTT Communication res
   /*_______________________Air_quality_data___________________________*/
   /*********************************************************************/
   char IAQStr[8];
-  dtostrf(iaqData.v_IAQ, 1, 2, IAQStr); /* Convert to char IAQ */
+  dtostrf(iaqData.v_IAQ, 1, 1, IAQStr); /* Convert to char IAQ with 1 decimal place */
   if(strcmp(IAQStr, lastIAQStr) != 0)
   {
     if(IAQStr != 0)
@@ -164,7 +164,7 @@ void MQTTPublishing::MQTT_publishData() /* Subroutine for MQTT Communication res
   }
 
   char eCO2Str[8];
-  dtostrf(iaqData.v_eCO2, 1, 2, eCO2Str); /* Convert to char eCO2 */
+  dtostrf(iaqData.v_eCO2, 1, 1, eCO2Str); /* Convert to char eCO2 with 1 decimal place */
   if(strcmp(eCO2Str, lasteCO2Str) != 0)
   {
     if(eCO2Str != 0)
@@ -176,7 +176,7 @@ void MQTTPublishing::MQTT_publishData() /* Subroutine for MQTT Communication res
   }
 
   char TVOCStr[8];
-  dtostrf(iaqData.v_TVOC, 1, 2, TVOCStr); /* Convert to char TVOC */
+  dtostrf(iaqData.v_TVOC, 1, 1, TVOCStr); /* Convert to char TVOC with 1 decimal place */
   if(strcmp(TVOCStr, lastTVOCStr) != 0)
   {
     if(TVOCStr != 0)
@@ -188,7 +188,7 @@ void MQTTPublishing::MQTT_publishData() /* Subroutine for MQTT Communication res
   }
 
   char EtOHStr[8];
-  dtostrf(iaqData.v_EtOH, 1, 2, EtOHStr); /* Convert to char EtOH */
+  dtostrf(iaqData.v_EtOH, 1, 1, EtOHStr); /* Convert to char EtOH with 1 decimal place */
   if(strcmp(EtOHStr, lastEtOHStr) != 0)
   {
     if(EtOHStr != 0)

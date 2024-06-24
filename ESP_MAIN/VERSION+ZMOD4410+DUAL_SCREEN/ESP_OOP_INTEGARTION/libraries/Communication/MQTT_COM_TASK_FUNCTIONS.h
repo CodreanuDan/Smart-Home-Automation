@@ -41,7 +41,6 @@ public:
   MQTTCommunication();
   static void MQTT_Communciation();                                      /* Function responsable for MQTT communication: reconnecting to server, publishing data, making decisions based on received data and sending updates to the system */
   static void callback(char *topic, byte *message, unsigned int length); /* Subroutine for MQTT Communication Task responsable for showing the received messages and making decisions accrodingly */
-                                                                         // void publishData();                                                                       /* Subroutine for MQTT Communication responsable for publishing data to subscribed MQTT topics  */
 };
 
 extern MQTTCommunication mqttCOM;
@@ -86,11 +85,15 @@ void MQTTCommunication::MQTT_Communciation() /* Function responsable for MQTT co
   if (!client.connected()) /* If not connected to MQTT Server, try to reconnect */
   {
     mqttCOM.reconnect();
+    mqttStatus = "Disconnected";
+    
   }
   else if (client.connected())
   {
     client.loop(); /* Client loop : responsable for MQTT communication between the publishers and the subscribers, contains the callback function */
     // publishData();                                                                        /* Subroutine for MQTT Communication responsable for publishing data to subscribed MQTT topics  */
+
+    mqttStatus = "Connected";
 
     long now = millis();
     if (now - lastMsg > 5000)

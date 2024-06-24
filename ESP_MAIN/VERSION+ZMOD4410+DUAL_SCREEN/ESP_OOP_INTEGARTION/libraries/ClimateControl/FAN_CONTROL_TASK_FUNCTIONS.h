@@ -137,7 +137,8 @@ void FanControlClass::fanControl() /* Controls the Fan. Can change the currentSt
 /****************************************************************************************************************************/
 void FanControlClass::toggleFan(bool state) /* Toggles the FAN --> ON/OFF */
 {
-  digitalWrite(pin_fanRelayPin, state ? HIGH : LOW); /* Toggles the fan by checking the currentState */
+  digitalWrite(pin_fanRelayPin, state ? LOW : HIGH); /* Toggles the fan by checking the currentState */
+  digitalWrite(pin_fanRelayPinGND, state ? LOW : HIGH); /* Toggles the fan by checking the currentState */
   Serial.println(state ? "Fan is ON" : "Fan is OFF");
 }
 
@@ -146,7 +147,8 @@ void FanControlClass::toggleFan(bool state) /* Toggles the FAN --> ON/OFF */
 /****************************************************************************************************************************/
 void FanControlClass::toggleHeat0(bool state) /* Toggles the HEAT --> ON/OFF when no threshold is recived from MQTT Server (0)*/
 {
-  digitalWrite(pin_heatRelayPin, state ? HIGH : LOW); /* Toggles the heat by checking the currentState */
+  digitalWrite(pin_heatRelayPin, state ? LOW : HIGH); /* Toggles the heat by checking the currentState */
+  digitalWrite(pin_heatRelayPinGND, state ? LOW : HIGH); /* Toggles the heat by checking the currentState */
   Serial.println(state ? "Heat is ON" : "Heat is OFF");
 }
 

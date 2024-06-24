@@ -65,10 +65,11 @@ bool bmeReadFlag; /* Flag for BME 280 read task */
 
 struct IaqData /* IAQ data structure */
 {
-  float v_IAQ; /* IAQ value */
+  float v_IAQ;  /* IAQ value */
   float v_TVOC; /* TVOC value */
   float v_eCO2; /* eCO2 value */
   float v_EtOH; /* EtOH value */
+  char s_sensorStat[20];/* H2 value */
 };
 IaqData iaqData; /* IAQ data structure object */
 
@@ -81,6 +82,17 @@ IaqData iaqData; /* IAQ data structure object */
 /****************************************************************************************************************************/
 #define RX2_PIN 16 /* RX pin on ESP32 UART 2  */
 #define TX2_PIN 17 /* TX pin on ESP32 UART 2  */
+
+/****************************************************************************************************************************/
+/*_______________________________________________________I2C_BUS____________________________________________________________*/
+/****************************************************************************************************************************/
+/* I2C_BUS_PINS: --> D21: I2C SDA - Serial data
+                 --> D22: I2C SCL - Serial clock
+               (ESP 32 Pinout diagram)     */
+
+/*********_Second_I2C_for_OLED_Display_SSD1315_**********/
+#define SDA_PIN_OLED 18 /* SDA pin on ESP32 I2C bus for OLED_Display_SSD1315 */
+#define SCL_PIN_OLED 19 /* SCL pin on ESP32 I2C bus for OLED_Display_SSD1315 */
 
 /****************************************************************************************************************************/
 /*______________________________________________________WIFI_LIB____________________________________________________________*/
@@ -96,6 +108,16 @@ WiFiClient espClient; /* Declararea unui obiect de tip WiFiClient numit espClien
 #define password "SkodaOctavia2005"
 // #define password "29393145"
 // #define password "passwlane204ieeia"
+
+/*********_Wifi_Connection_Flag_********/
+String wifiStatus; /* Flag for WiFi connection status */
+
+/****************************************************************************************************************************/
+/*___________________________________________________NTP_SERVER_____________________________________________________________*/
+/****************************************************************************************************************************/
+#define NTP_SERVER "pool.ntp.org"
+#define UTC_OFFSET 3
+#define UTC_OFFSET_DST 0
 
 /****************************************************************************************************************************/
 /*________________________________________________________MQTT______________________________________________________________*/
@@ -115,9 +137,9 @@ char msg[50];      /* Size of message */
 #define ID "ESP32/Module_1"
 
 //_MQTT_Server_Adress:
-// #define mqtt_server "192.168.0.24"                               /* MQTT Server --> BACAU  */
-#define mqtt_server "192.168.1.193" /* MQTT Server --> IASI  */
-// #define mqtt_server "192.168.0.152"                                 /* MQTT Server --> E204  */
+#define mqtt_server "192.168.0.24"                               /* MQTT Server --> BACAU  */
+// #define mqtt_server "192.168.1.193" /* MQTT Server --> IASI  */
+// #define mqtt_server "192.168.0.152" /* MQTT Server --> E204  */
 
 //__________THERSHOLDS_&_OUTSIDE_DATA:
 struct ReceivedData /* Structure for the received data from the MQTT Server  */
@@ -126,7 +148,11 @@ struct ReceivedData /* Structure for the received data from the MQTT Server  */
   float v_temperatureThreshold = 0; /* Takes updated values from MQTT Topic responsable for temp. control (callback function from MQTT_COM_TASK_FUNCTIONS.h )    */
   float v_humidityThreshold = 70;   /* It will be automated (remote control  ---> suggestion via fuzzy logic ?)                                                  */
 };
-ReceivedData receivedData;/* Received data structure object */
+ReceivedData receivedData; /* Received data structure object */
+
+/*************_MQTT_Connection_Flag_*************/
+String mqttStatus; /* Flag for MQTT connection status */
+
 /*##########################################################################################################################*/
 /*|____________________________________________________DISPLAY:____________________________________________________________|*/
 /*##########################################################################################################################*/
@@ -140,27 +166,26 @@ ReceivedData receivedData;/* Received data structure object */
 */
 
 /**************CHANGE_DISPLAY_INFO_CONTROL_VARIABLES_*********************/
-volatile uint8_t button_up_clicked = 0; /* only perform action when button is clicked, and wait until another press */
-volatile uint8_t check_display_count = 0;/* check the display state */
-volatile uint8_t display_increment = 0;/* increment the display state */
+volatile uint8_t button_up_clicked = 0;   /* only perform action when button is clicked, and wait until another press */
+volatile uint8_t check_display_count = 0; /* check the display state */
+volatile uint8_t display_increment = 0;   /* increment the display state */
 
 /*******************_OLED_DISPLAY_SETTINGS_******************************/
-#define SCREEN_WIDTH 128    /* OLED display width, in pixels */
-#define SCREEN_HEIGHT 64    /* OLED display height, in pixels*/
-#define OLED_RESET -1       /* Reset pin # (or -1 if sharing Arduino reset pin) */
-#define SCREEN_ADDRESS 0x3C /*< See datasheet for Address; 0x3D for 128x64, 0x3C for 128x32 */
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);/* Initialize the OLED display using Wire library */
+#define SCREEN_WIDTH 128                                                   /* OLED display width, in pixels */
+#define SCREEN_HEIGHT 64                                                   /* OLED display height, in pixels*/
+#define OLED_RESET -1                                                      /* Reset pin # (or -1 if sharing Arduino reset pin) */
+#define SCREEN_ADDRESS 0x3C                                                /*< See datasheet for Address; 0x3D for 128x64, 0x3C for 128x32 */
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire1, OLED_RESET); /* Initialize the OLED display using Wire library */
 
 /*******************_OLED_DISPLAY_STATE_MACHINE_DATA_******************************/
-const int NUM_ITEMS = 4; 
+const int NUM_ITEMS = 4; // number of items in the list and also the number of screenshots and screenshots with QR codes (other screens)
 
-const char *menu_items [NUM_ITEMS] =
-{ 
-  "Welcome",
-  "Conectivitate",
-  "Termostat",
-  "Calitate aer"
-};
+const char *menu_items[NUM_ITEMS] =
+    { // array with item names
+        "*** Welcome ***",
+        "*** Conectivitate ***",
+        "*** Termostat ***",
+        "*** Calitate aer ***"};
 
 enum oledState
 {
@@ -176,16 +201,16 @@ const char *stateToString_oledState(oledState oled_state)
 {
   switch (oled_state)
   {
-    case ECRAN_0:
-      return menu_items[0];
-    case ECRAN_1:
-      return menu_items[1];
-    case ECRAN_2:
-      return menu_items[2];
-    case ECRAN_3:
-      return menu_items[3];
-    default:
-      return "UNKNOWN";
+  case ECRAN_0:
+    return menu_items[0];
+  case ECRAN_1:
+    return menu_items[1];
+  case ECRAN_2:
+    return menu_items[2];
+  case ECRAN_3:
+    return menu_items[3];
+  default:
+    return "UNKNOWN";
   }
 }
 
@@ -231,7 +256,6 @@ const char *stateToString(State state) /* Function that returns the state as a s
   }
 }
 
-
 //_RELAY_CONTROL_FLAGS:
 bool f_fanControlTask = false;  /*  Flag for Fan  Control - flag false --> true: flag ; decision -->  flag false  */
 bool f_heatControlTask = false; /*  Flag for Heat Control - flag false --> true: flag ; decision -->  flag false  */
@@ -259,6 +283,9 @@ bool f_heatControlTask = false; /*  Flag for Heat Control - flag false --> true:
 //_______________OUTPUT_PINS:
 #define pin_heatRelayPin 13 /* Heat relay  pin  (toggle heat ON/OFF)                               */
 #define pin_fanRelayPin 12  /* Fan relay   pin  (toggle fan ON/OFF)                                */
+
+#define pin_heatRelayPinGND 33 /* Heat relay  GND pin  (toggle heat ON/OFF)                          */
+#define pin_fanRelayPinGND 32  /* Fan relay   GND pin  (toggle fan ON/OFF)                           */
 
 #define pin_ledBuiltInPin 2 /* LedBuiltIn  pin  (signal if connection to MQTT Server is realized)  */
 #define pin_ledRedPin 5     /* Pin for led(in role of lights ON/OFF)                               */

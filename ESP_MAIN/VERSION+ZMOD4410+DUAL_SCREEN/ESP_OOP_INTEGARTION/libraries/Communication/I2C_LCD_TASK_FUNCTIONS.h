@@ -37,12 +37,13 @@ class Display_data_LCD_OLED /* Class for the display data on the LCD and OLED di
 private:
     static void oled_lcd_display_update(String oled_message, uint8_t cursor_1,
                                         uint8_t cursor_2, uint8_t text_size,
-                                        String lcd_first_row_msg, String lcd_second_row_msg); /* Function responsable for updating the display */
-    static int manage_button_pressing();                                                      /* Function responsable for checking the button press */
+                                        String lcd_first_row_msg, String lcd_second_row_msg);       /* Function responsable for updating the display */
+    static int manage_button_pressing();                                                            /* Function responsable for checking the button press */
+    static void updateDisplayIfChanged(String newMessage, String newFirstRow, String newSecondRow); /* Function responsable for updating the display if changed */
 public:
-    Display_data_LCD_OLED();                                       /* Constructor */
-    static int get_button_increment();                             /* Function responsable getting the index of button pressing */
-    static void change_display_information(uint8_t display_index); /* Function responsable for changing the display information */
+    Display_data_LCD_OLED();                                                            /* Constructor */
+    static int get_button_increment();                                                  /* Function responsable getting the index of button pressing */
+    static void change_display_information(uint8_t display_index, struct tm &timeinfo); /* Function responsable for changing the display information */
 };
 
 extern Display_data_LCD_OLED displayDataLCD_OLED; /* Object of the class */
@@ -67,11 +68,15 @@ void T_oledLcdTask(void *parameter) /* Main function of the Task */
 
         /*________TASK_SUB-ROUTINES___________*/
 
-        // dataLog(taskName, p_uartComTask); /* Task info */
-
-        volatile uint8_t oled_screen_number;                                /* Variable for the OLED screen number */
-        oled_screen_number = displayDataLCD_OLED.get_button_increment();    /* Get the index of button pressing */
-        displayDataLCD_OLED.change_display_information(oled_screen_number); /* Change the display information */
+        struct tm timeinfo;           /* Time structure */
+        if (!getLocalTime(&timeinfo)) /* If the time is not available */
+        {
+            Serial.println("[NTP_SERVER] Failed to obtain time !"); /* Print the error message */
+            return;                                                 /* Return */
+        }
+        volatile uint8_t oled_screen_number;                                          /* Variable for the OLED screen number */
+        oled_screen_number = displayDataLCD_OLED.get_button_increment();              /* Get the index of button pressing */
+        displayDataLCD_OLED.change_display_information(oled_screen_number, timeinfo); /* Change the display information */
 
         /*____________________________________*/
 
@@ -107,43 +112,49 @@ void Display_data_LCD_OLED::oled_lcd_display_update(String oled_message, uint8_t
 
     lcd.setCursor(0, 1);
     lcd.println(lcd_second_row_msg);
-    
 }
 
 /****************************************************************************************************************************/
 /*___________________________________________CHANGE_DISPLAY_INFO_FUNCTION___________________________________________________*/
 /****************************************************************************************************************************/
-void Display_data_LCD_OLED::change_display_information(uint8_t display_index) /* Function responsable for changing the display information */
+void Display_data_LCD_OLED::change_display_information(uint8_t display_index, struct tm &timeinfo) /* Function responsable for changing the display information */
 {
 
     String oled_message;
     String wifiNetoworkIP;
     String tempString;
-    String thresholdString; 
+    String thresholdString;
     String humidityString;
-    String iaqString; 
+    String iaqString;
     String lcd_first_row_msg;
     String lcd_second_row_msg;
-
+    String co2String;
+    String tvocString;
 
     switch (display_index)
     {
     case 0:
         currentOledState = ECRAN_0;
         /****************************************************************************************************************************/
+        char timeStr[16];
+        strftime(timeStr, sizeof(timeStr), "%H:%M:%S %d/%m   ", &timeinfo);
 
-        lcd_first_row_msg = "Smart Home";
-        lcd_second_row_msg = "by Dan Codreanu";
+        lcd_first_row_msg = "Smart Home Dan.C";
+        lcd_second_row_msg = timeStr;
 
         if (currentOledState == ECRAN_0)
         {
             String title = String(stateToString_oledState(currentOledState));
             int spaces = (6 - title.length()) / 2;
-            oled_message = String(' ', spaces) + "  " + title + "\n   Smart home" + "\n   by Dan Codreanu";
+            oled_message = String(' ', spaces) + "  " + title + 
+                         "\n  Smart home" + 
+                         "\n  by Dan Codreanu" +
+                         "\n  " + timeStr;
+
+            displayDataLCD_OLED.updateDisplayIfChanged(oled_message, lcd_first_row_msg, lcd_second_row_msg);
             displayDataLCD_OLED.oled_lcd_display_update(oled_message, 0, 0, 1, lcd_first_row_msg, lcd_second_row_msg);
         }
         /****************************************************************************************************************************/
-
 
         break;
 
@@ -152,14 +163,19 @@ void Display_data_LCD_OLED::change_display_information(uint8_t display_index) /*
         /****************************************************************************************************************************/
 
         wifiNetoworkIP = WiFi.localIP().toString();
-        lcd_first_row_msg = "Conectivitate";
+        lcd_first_row_msg = "Conectivitate   ";
         lcd_second_row_msg = "IP: " + wifiNetoworkIP;
 
         if (currentOledState == ECRAN_1)
         {
             String title = String(stateToString_oledState(currentOledState));
             int spaces = (6 - title.length()) / 2;
-            oled_message = String(' ', spaces) + "  " + title + "\n   Wifi: " + wifiNetoworkIP + "\n   MQTT: " + "\n   BLE:";
+            oled_message = String(' ', spaces/2) + "" + title +
+                           "\n *Wifi: " + ssid +
+                           "\n *IP:" + wifiNetoworkIP +
+                           "\n *MQTT: " + mqttStatus +
+                           "\n *BLE:";
+            displayDataLCD_OLED.updateDisplayIfChanged(oled_message, lcd_first_row_msg, lcd_second_row_msg);
             displayDataLCD_OLED.oled_lcd_display_update(oled_message, 0, 0, 1, lcd_first_row_msg, lcd_second_row_msg);
         }
         /****************************************************************************************************************************/
@@ -170,17 +186,28 @@ void Display_data_LCD_OLED::change_display_information(uint8_t display_index) /*
         currentOledState = ECRAN_2;
         /****************************************************************************************************************************/
 
-        tempString        = String(avgVal.v_final_temperatureValue, 1);  // One decimal place
-        humidityString    = String(avgVal.v_final_humidityValue, 1); // One decimal place
-        thresholdString   = String(receivedData.v_temperatureThreshold, 1); // One decimal place
-        lcd_first_row_msg = "Temp:" + tempString + "Th:" + thresholdString;
-        lcd_second_row_msg = "Hum:" + humidityString + "St:" + stateToString(currentState);
-
+        tempString = String(avgVal.v_final_temperatureValue, 1);
+        humidityString = String(int(avgVal.v_final_humidityValue));
+        thresholdString = String(receivedData.v_temperatureThreshold, 1);
+        lcd_first_row_msg = "Temp:" + tempString + " Rh:" + humidityString + " ";
+        if (currentState == 0)
+        {
+            lcd_second_row_msg = "Set:" + thresholdString + " " + stateToString(currentState) + "     ";
+        }
+        else
+        {
+            lcd_second_row_msg = "Set:" + thresholdString + " " + stateToString(currentState);
+        }
         if (currentOledState == ECRAN_2)
         {
             String title = String(stateToString_oledState(currentOledState));
             int spaces = (6 - title.length()) / 2;
-            oled_message = String(' ', spaces) + "  " + title + "\nTemp.: " + tempString + "C" +"\n Termosat: " + thresholdString + "\nUmidiate: " + humidityString +" %" + "\nStare Clim.:" + stateToString(currentState);
+            oled_message = String(' ', spaces) + "  " + title + 
+                         "\n *Temp.: " + tempString + "C" + 
+                         "\n *Termosat: " + thresholdString + 
+                         "\n *Umidiate: " + humidityString + " %" + 
+                         "\n *Stare Clim.:" + stateToString(currentState);
+            displayDataLCD_OLED.updateDisplayIfChanged(oled_message, lcd_first_row_msg, lcd_second_row_msg);
             displayDataLCD_OLED.oled_lcd_display_update(oled_message, 0, 0, 1, lcd_first_row_msg, lcd_second_row_msg);
         }
         /****************************************************************************************************************************/
@@ -191,22 +218,48 @@ void Display_data_LCD_OLED::change_display_information(uint8_t display_index) /*
         currentOledState = ECRAN_3;
         /****************************************************************************************************************************/
 
-        lcd_first_row_msg = "Calitate aer";
         iaqString = String(iaqData.v_IAQ, 1); // One decimal place
-        lcd_second_row_msg = "IAQ: " + iaqString;
+        co2String = String(int(iaqData.v_eCO2));
+        tvocString = String(int(iaqData.v_TVOC));
+        lcd_first_row_msg = "Calitate aer:" + iaqString;
+        lcd_second_row_msg = "CO2:" + co2String + " ppm     ";
 
         if (currentOledState == ECRAN_3)
         {
             String title = String(stateToString_oledState(currentOledState)).substring(0);
             int spaces = (6 - title.length()) / 2;
-            oled_message = String(' ', spaces) + "  " + title + "\nIAQ: " + "\nIAQ: ";
+            oled_message = String(' ', spaces) + " " + title +
+                           "\n *IAQ: " + iaqString +
+                           "\n *CO2: " + co2String + " ppm" +
+                           "\n *TVOC: " + tvocString + " ppb" +
+                           "\n *ZMOD stat: " + String(iaqData.s_sensorStat);
+
+            displayDataLCD_OLED.updateDisplayIfChanged(oled_message, lcd_first_row_msg, lcd_second_row_msg);
             displayDataLCD_OLED.oled_lcd_display_update(oled_message, 0, 0, 1, lcd_first_row_msg, lcd_second_row_msg);
         }
         /****************************************************************************************************************************/
 
         break;
     }
+}
 
+/****************************************************************************************************************************/
+/*_______________________________________________CHANGE_INFO_IF_CHANGE______________________________________________________*/
+/****************************************************************************************************************************/
+void Display_data_LCD_OLED::updateDisplayIfChanged(String newMessage, String newFirstRow, String newSecondRow)
+{
+    static String oldMessage = "";
+    static String oldFirstRow = "";
+    static String oldSecondRow = "";
+
+    if (newMessage != oldMessage || newFirstRow != oldFirstRow || newSecondRow != oldSecondRow)
+    {
+        lcd.clear();
+        displayDataLCD_OLED.oled_lcd_display_update(newMessage, 0, 0, 1, newFirstRow, newSecondRow);
+        oldMessage = newMessage;
+        oldFirstRow = newFirstRow;
+        oldSecondRow = newSecondRow;
+    }
 }
 
 /****************************************************************************************************************************/

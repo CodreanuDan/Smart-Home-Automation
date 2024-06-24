@@ -65,11 +65,19 @@ void SetupInit::wireInit() /*  Function that initializes the I2C Communication *
   Serial.println("###########################################################################################################################");
   Serial.println("  ");
 
+  /**********_Default_I2C_Begin_*************/
   Wire.begin(); /* Begin communication with I2C bus */
+  Serial.println("[Default_I2C_BUS]: Initialized!"); /* Print message to Serial Monitor */
   delay(tc_moduleSetup_delay);
+
+  /************_OLED_I2C_Begin_**************/
+  Wire1.begin(SDA_PIN_OLED, SCL_PIN_OLED); /* Begin communication with I2C bus for OLED Display */
+  Serial.println("[OLED_I2C_BUS]: Initialized!"); /* Print message to Serial Monitor */
+  delay(tc_moduleSetup_delay);
+
 }
 /***********************************************************************************************************************************************************/
-/*_____________________________________________________________________WIRE_BEGIN_(I2C):___________________________________________________________________*/
+/*__________________________________________________________________SERIAL_BEGIN_(UART):___________________________________________________________________*/
 /***********************************************************************************************************************************************************/
 void SetupInit::uart2Init() /* Function that initializes UART 2 */
 {
@@ -95,14 +103,30 @@ void SetupInit::pinInit() /* Function that initializes the GPIO Pins */
   //__________OUTPUT_PINS:
 
   pinMode(pin_heatRelayPin, OUTPUT); /* >> pinMode: heatRelayPin: as OUTPUT. (Controls the toggle of the HEAT ON/OFF)*/
+  digitalWrite(pin_heatRelayPin, LOW);
   Serial.print("  >> pinMode: heatRelayPin:");
   Serial.print(pin_heatRelayPin);
   Serial.println(" as OUTPUT.");
   delay(tc_objCreate_delay);
 
   pinMode(pin_fanRelayPin, OUTPUT); /* >> pinMode: fanRelayPin: as OUTPUT. (Controls the toggle of the FAN ON/OFF) */
+  digitalWrite(pin_fanRelayPin, LOW);
   Serial.print("  >> pinMode: fanRelayPin:");
   Serial.print(pin_fanRelayPin);
+  Serial.println(" as OUTPUT.");
+  delay(tc_objCreate_delay);
+
+  pinMode(pin_heatRelayPinGND, OUTPUT); /* >> pinMode: heatRelayPin: as OUTPUT. (Controls the toggle of the HEAT ON/OFF)*/
+  digitalWrite(pin_heatRelayPinGND, LOW);
+  Serial.print("  >> pinMode: heatRelayPinGND:");
+  Serial.print(pin_heatRelayPinGND);
+  Serial.println(" as OUTPUT.");
+  delay(tc_objCreate_delay);
+
+  pinMode(pin_fanRelayPinGND, OUTPUT); /* >> pinMode: fanRelayPin: as OUTPUT. (Controls the toggle of the FAN ON/OFF) */
+  digitalWrite(pin_fanRelayPinGND, LOW);
+  Serial.print("  >> pinMode: fanRelayPinGND:");
+  Serial.print(pin_fanRelayPinGND);
   Serial.println(" as OUTPUT.");
   delay(tc_objCreate_delay);
 
@@ -157,10 +181,10 @@ void SetupInit::lcdInit() /* Function that initializes the LCD Display */
   lcd.backlight();
 
   lcd.setCursor(0, 0);
-  lcd.print("Smart Home");
+  lcd.print("** Smart Home **");
 
   lcd.setCursor(0, 1);
-  lcd.print("by Dan C.");
+  lcd.print("by Dan C.-Setup");
 
   //__LCD_INIT_END__
   delay(tc_moduleSetup_delay);

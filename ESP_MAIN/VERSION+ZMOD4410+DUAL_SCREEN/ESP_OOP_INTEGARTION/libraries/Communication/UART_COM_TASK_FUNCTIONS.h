@@ -96,17 +96,17 @@ void UART_Com::parseData(String uart_rx_data_to_parse) /* Function responsable f
 {
     const char* receivedData  = uart_rx_data_to_parse.c_str();
 
-    int parsed = sscanf(receivedData, "TX_%f_%f_%f_%f", &iaqData.v_eCO2, &iaqData.v_EtOH, &iaqData.v_TVOC, &iaqData.v_IAQ);
+    int parsed = sscanf(receivedData, "TX_%f_%f_%f_%f_%19s", &iaqData.v_eCO2, &iaqData.v_EtOH, &iaqData.v_TVOC, &iaqData.v_IAQ, iaqData.s_sensorStat);
 
-    // Check if the parsing was successful
-    if (parsed == 4)
+    /* Check if the parsing was successful */ 
+    if (parsed == 5)
     {
-        // The data was parsed successfully
+        /* The data was parsed successfully*/
         Serial.println("[UART_2_COM] Data parsed successfully!");
     }
     else
     {
-        // There was an error parsing the data
+        /*There was an error parsing the data*/ 
         Serial.println("[UART_2_COM] Error parsing the data!");
     }
 }
