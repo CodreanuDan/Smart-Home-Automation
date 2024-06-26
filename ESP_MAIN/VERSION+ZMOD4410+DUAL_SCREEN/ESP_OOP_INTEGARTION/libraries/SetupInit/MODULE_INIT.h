@@ -25,24 +25,26 @@
 /****************************************************************************************************************************/
 
 /*__LIBRARIES__*/
-
+#include <WiFi.h> /* WiFi communication library */
 /*__MODULES__*/
-#include "DEFINES.h" /*  Includes all the variables used on the program*/
+#include "DEFINES.h"                   /*  Includes all the variables used on the program*/
+#include "SETUP_WIFI_TASK_FUNCTIONS.h" /*  Includes the functions for the WiFi setup */
 
 /****************************************************************************************************************************/
 /*_______________________________________________CLASS_FUNCTIONS____________________________________________________________*/
 /****************************************************************************************************************************/
-class SetupInit/*  Class that contains the functions for the initialization of the modules */
+class SetupInit /*  Class that contains the functions for the initialization of the modules */
 {
 public:
   SetupInit();
-  static void wireInit();  /*  Function that initializes the I2C Communication */
-  static void pinInit();   /*  Function that initializes the GPIO Pins */
-  static void uart2Init(); /* Function that initializes UART 2 */
-  static void mqttInit();  /*  Function that initializes the MQTT Communication */
-  static void mutexInit(); /* Function that creates and initialse the mutex for task sync */
-  static void lcdInit();   /* Function that initializes the LCD Display */
-  static void oledInit();  /* Function that initializes the OLED Display */
+  static void wireInit();      /*  Function that initializes the I2C Communication */
+  static void pinInit();       /*  Function that initializes the GPIO Pins */
+  static void uart2Init();     /* Function that initializes UART 2 */
+  static void mqttInit();      /*  Function that initializes the MQTT Communication */
+  static void mutexInit();     /* Function that creates and initialse the mutex for task sync */
+  static void lcdInit();       /* Function that initializes the LCD Display */
+  static void oledInit();      /* Function that initializes the OLED Display */
+  static void wifiEventInit(); /* Function that handles the WiFi events */
 };
 
 extern SetupInit setupInit; /*  Object of the class SetupInit */
@@ -66,15 +68,14 @@ void SetupInit::wireInit() /*  Function that initializes the I2C Communication *
   Serial.println("  ");
 
   /**********_Default_I2C_Begin_*************/
-  Wire.begin(); /* Begin communication with I2C bus */
+  Wire.begin();                                      /* Begin communication with I2C bus */
   Serial.println("[Default_I2C_BUS]: Initialized!"); /* Print message to Serial Monitor */
   delay(tc_moduleSetup_delay);
 
   /************_OLED_I2C_Begin_**************/
-  Wire1.begin(SDA_PIN_OLED, SCL_PIN_OLED); /* Begin communication with I2C bus for OLED Display */
+  Wire1.begin(SDA_PIN_OLED, SCL_PIN_OLED);        /* Begin communication with I2C bus for OLED Display */
   Serial.println("[OLED_I2C_BUS]: Initialized!"); /* Print message to Serial Monitor */
   delay(tc_moduleSetup_delay);
-
 }
 /***********************************************************************************************************************************************************/
 /*__________________________________________________________________SERIAL_BEGIN_(UART):___________________________________________________________________*/
@@ -261,5 +262,29 @@ void SetupInit::mutexInit() /* Function that creates and initialse the mutex for
   delay(tc_moduleSetup_delay);
 }
 
+/***********************************************************************************************************************************************************/
+/*_____________________________________________________________________WIFI_EVENTS_INIT:___________________________________________________________________*/
+/***********************************************************************************************************************************************************/
+void SetupInit::wifiEventInit() /* Function that handles the WiFi events */
+{
+  Serial.println("###########################################################################################################################");
+  Serial.println("#|______________________________________________________WIFI_EVENTS_INIT__________________________________________________|#");
+  Serial.println("###########################################################################################################################");
+  Serial.println("  ");
+
+  //__WIFI_EVENTS_INIT__
+  Serial.println("<*> WiFi: --> Set WiFi Events<*>");
+
+  WiFi.onEvent(setupWifiConn.WiFiStationConnected, WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_CONNECTED);       /* Set the event for when the WiFi Station is connected */
+  WiFi.onEvent(setupWifiConn.WiFiGotIP, WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_GOT_IP);                     /* Set the event for when the WiFi Station gets an IP */
+  WiFi.onEvent(setupWifiConn.WiFiStationDisconnected, WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_DISCONNECTED); /* Set the event for when the WiFi Station is disconnected */
+  delay(tc_objCreate_delay);
+
+  /* Attempt to connect to WiFi with existing credentials */ 
+  WiFi.begin(ssid.c_str(), password.c_str());
+
+  /*__WIFI_EVENTS_INIT_END__*/
+  delay(tc_moduleSetup_delay);
+}
 /****************************************************************************************************************************/
 #endif /* MODULE_INIT_FUNCTIONS */

@@ -24,6 +24,7 @@
 #include <LiquidCrystal_I2C.h>/* Library for the I2C LCD */
 #include <Adafruit_GFX.h>     /* Library for the OLED display */
 #include <Adafruit_SSD1306.h> /* Library for the OLED display */
+#include <WiFi.h>             /* WiFi communication library */
 /*__LIBRARIES__*/
 
 /*__MODULES__*/
@@ -68,11 +69,17 @@ void T_oledLcdTask(void *parameter) /* Main function of the Task */
 
         /*________TASK_SUB-ROUTINES___________*/
 
-        struct tm timeinfo;           /* Time structure */
-        if (!getLocalTime(&timeinfo)) /* If the time is not available */
+        struct tm timeinfo;           /* Time structure  for NTP */
+
+        if (WiFi.status() == WL_CONNECTED) /* If the WiFi is connected */
         {
-            Serial.println("[NTP_SERVER] Failed to obtain time !"); /* Print the error message */
-            return;                                                 /* Return */
+        
+            if (!getLocalTime(&timeinfo)) /* If the time is not available */
+            {
+                Serial.println("[NTP_SERVER] Failed to obtain time !"); /* Print the error message */
+                return;                                                 /* Return */
+            }
+
         }
         volatile uint8_t oled_screen_number;                                          /* Variable for the OLED screen number */
         oled_screen_number = displayDataLCD_OLED.get_button_increment();              /* Get the index of button pressing */

@@ -99,13 +99,17 @@ IaqData iaqData; /* IAQ data structure object */
 /****************************************************************************************************************************/
 WiFiClient espClient; /* Declararea unui obiect de tip WiFiClient numit espClient */
 
-//_Wi-Fi_Network_Name(SSID):
-#define ssid "CDIDC"
+/************_Wi-Fi_Network_Name(SSID):_**********/
+String ssid = "empty";
+
+// #define ssid "CDIDC"
 // #define ssid "TP-Link_47D4"
 // #define ssid "E204"
 
-//_Wi-Fi_Network_Password:
-#define password "SkodaOctavia2005"
+/************_Wi-Fi_Network_Password:_************/	
+String password = "empty";
+
+// #define password "SkodaOctavia2005"
 // #define password "29393145"
 // #define password "passwlane204ieeia"
 
@@ -340,10 +344,10 @@ const static uint8_t p_heatControlTask = 25; /*  >> heatControlTask priority: ME
 //_Core_1_Tasks_prio:
 
 //____Diag_Tasks:
-const static uint8_t p_scanI2CTask = 1; /*  >> scanI2CTask priority: HIGH            */
+const static uint8_t p_scanI2CTask = 2; /*  >> scanI2CTask priority: HIGH            */
 
 //_____Com_Tasks:
-const static uint8_t p_setupWiFiTask = 2;               /*  >> setupWiFiTask priority: HIGH          */
+const static uint8_t p_setupWiFiTask = 1;               /*  >> setupWiFiTask priority: HIGH          */
 const static uint8_t p_MQTT_CommunciationTask = 5;      /*  >> MQTT_CommunciationTask priority: HIGH */
 const static uint8_t p_MQTT_publishDataTask = 6;        /*  >> MQTT_CommunciationTask priority: HIGH */
 const static uint8_t p_MQTT_publishSystemStateTask = 6; /*  >> MQTT_CommunciationTask priority: HIGH */
