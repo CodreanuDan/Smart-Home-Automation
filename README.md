@@ -2,8 +2,8 @@
 
 ![Project Logo]("C:\Users\uig37216\Downloads\839adb88-0548-4771-9f96-ea52c0dce8bc.webp")
 
-## Description
-Smart Home System - Bachelor's Degree Project
+## Description Smart Home System - Bachelor's Degree Project
+
 This is my bachelor's degree project, where I aimed to create a functional smart home system with a particular focus on the thermal control and air quality modules, using a variety of sensors for these tasks. I wanted to make my project as interactive as possible, so I designed it with a lot of visualization and diversity in mind.
 
 Project Overview
@@ -55,11 +55,13 @@ Conclusion
 I hope you will read this description in detail to get an idea of what I have accomplished here. Thank you for your attention!
 
 ## Table of Contents
-- [Installation](#installation)
-- [Usage](#usage)
-- [Features](#features)
-- [Contributing](#contributing)
-- [License](#license)
+- [1. The Main Box Interface](#installation)
+- [2. Sensor Connectivity](#usage)
+- [3. IoT Server Communication](#features)
+- [4. Climate Control System](#contributing)
+- [5. IoT Server and Raspberry Pi](#license)
+- [6. Node-RED and Firebase Integration](#license)
+- [7. Mobile App](#license)
 
 ## 🛠️ Installation
 Step-by-step guide on how to get your project running locally.
