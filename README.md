@@ -1,4 +1,4 @@
-# 🚀 Project Name
+# 🚀 Smart Automation by Codreanu Dan
 
 ![Project Logo](https://link-to-your-logo.png)
 
