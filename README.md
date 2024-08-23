@@ -23,7 +23,7 @@ The main box, which contains the MCU, sensors, and actuators, is equipped with t
 - 📊 Sensor data
 - 🌡️ Climate control information
 
-- ![Smart Home System Overview](C:\Users\uig37216\Downloads\839adb88-0548-4771-9f96-ea52c0dce8bc.webp)
+![Smart Home System Overview]("C:\Users\uig37216\Downloads\0915a94f-81a8-442b-b766-d02b4f5a1405.jpg")
 
 **Navigation:**
 
