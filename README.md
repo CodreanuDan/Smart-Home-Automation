@@ -12,8 +12,6 @@ This is my bachelor's degree project, where I aimed to create a functional smart
 5. [IoT Server and Raspberry Pi](#5-iot-server-and-raspberry-pi)
 6. [Node-RED and Firebase Integration](#6-node-red-and-firebase-integration)
 7. [Mobile App](#7-mobile-app)
-8. [Installation](#8-installation)
-9. [Conclusion](#9-conclusion)
 
 ---
 
