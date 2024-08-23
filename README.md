@@ -89,5 +89,5 @@ I created a simple Android app using Flutter. Currently, the app supports:
 
 ---
 
-🎯 Conclusion
+🎯 
 I hope you read this description and also hope you like what you saw. Thank you for your attention!
