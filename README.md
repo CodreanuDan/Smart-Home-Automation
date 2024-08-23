@@ -1,6 +1,6 @@
 # 🚀 Smart Automation by Codreanu Dan
 
-![Project Logo](https://link-to-your-logo.png)
+![Project Logo]("C:\Users\uig37216\Downloads\839adb88-0548-4771-9f96-ea52c0dce8bc.webp")
 
 ## Description
 A brief description of what your project does and why it's useful.
