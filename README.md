@@ -41,6 +41,9 @@ The main box, which contains the MCU, sensors, and actuators, is equipped with t
 ![SchemaCablaje](https://github.com/user-attachments/assets/d99bb49f-a8fe-4e5d-8138-38b4f3381c85)
 ![Arh_EMBEDED](https://github.com/user-attachments/assets/ed111ee5-4fe5-49bd-aa4a-35ff91f67a9c)
 
+<img src="https://github.com/user-attachments/assets/ed111ee5-4fe5-49bd-aa4a-35ff91f67a9c" alt="Arh_EMBEDED" width="400"/>
+<img src="https://github.com/user-attachments/assets/d99bb49f-a8fe-4e5d-8138-38b4f3381c85" alt="SchemaCablaje" width="400"/>
+
 ---
 
 ## 3. 🌐 **IoT Server Communication**
