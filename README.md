@@ -25,6 +25,8 @@ The main box, which contains the MCU, sensors, and actuators, is equipped with t
 
 ![Main overview of the project](https://github.com/user-attachments/assets/c6cb7e32-e763-4e55-b984-941ef46d4a73 )
 
+<img src="[https://github.com/favicon.ico](https://github.com/user-attachments/assets/c6cb7e32-e763-4e55-b984-941ef46d4a73 )" width="48">
+
 **Navigation:**
 
 - Navigation is done using a button.
