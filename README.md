@@ -25,8 +25,6 @@ The main box, which contains the MCU, sensors, and actuators, is equipped with t
 
 ![Main overview of the project](https://github.com/user-attachments/assets/c6cb7e32-e763-4e55-b984-941ef46d4a73 )
 
-<img src="[https://github.com/favicon.ico](https://github.com/user-attachments/assets/c6cb7e32-e763-4e55-b984-941ef46d4a73 )" width="48">
-
 **Navigation:**
 
 - Navigation is done using a button.
@@ -39,6 +37,8 @@ The main box, which contains the MCU, sensors, and actuators, is equipped with t
 - **Sensor Communication:** All sensors are digital and communicate via the I2C protocol.
 - **Air Quality Sensor:** Since the air quality sensor isn't compatible with the ESP32 microcontroller, it's connected to an Arduino Uno board that communicates with the ESP32 via UART.
 - **Software Architecture:** Modular design incorporating elements from the FreeRTOS operating system.
+![SchemaCablaje](https://github.com/user-attachments/assets/d99bb49f-a8fe-4e5d-8138-38b4f3381c85)
+![Arh_EMBEDED](https://github.com/user-attachments/assets/ed111ee5-4fe5-49bd-aa4a-35ff91f67a9c)
 
 ---
 
