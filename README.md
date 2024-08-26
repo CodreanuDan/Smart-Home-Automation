@@ -3,6 +3,7 @@
 ## 📝 **Project Overview**
 
 This is my bachelor's degree project, where I aimed to create a functional smart home system with a particular focus on the thermal control and air quality modules, using a variety of sensors for these tasks. I wanted to make my project as interactive as possible, so I designed it with a lot of visualization and diversity in mind.
+![Diagrama proiect](https://github.com/user-attachments/assets/63d97702-bdcb-4a8c-8567-4ba4dfdb76e1)
 
 ## 📑 **Table of Contents**
 1. [The Main Box Interface](#1-the-main-box-interface)
@@ -59,6 +60,8 @@ Communication with the IoT server is done via Wi-Fi using the MQTT (Message Queu
 For the climate control system, I used a Peltier cell, which operates based on the thermoelectric effect, to create a heating/cooling unit.
 
 - **Control Mechanism:** The cell is controlled by an H-bridge that manages the current flow using two pairs of relays triggered by commands from a finite state machine for climate control.
+![Control_Racire](https://github.com/user-attachments/assets/c9afbe55-f0bc-4912-a40c-f86485e2c920)
+![Racire_1sens](https://github.com/user-attachments/assets/34b3ba98-33a6-4e9f-bace-8cd147296aef)
 
 ---
 
@@ -71,6 +74,8 @@ The Raspberry Pi hosts the IoT server, which includes the Mosquitto broker desig
   - Receives data from the box and sends it to the Node-RED Dashboard, which then sends it to Firebase.
   - Receives data from the Node-RED Dashboard or mobile app via Firebase.
 - **Main Tasks:** Establish the connection and handle received data, with synchronization through a JSON file.
+![Arhitectura_ServerMqtt](https://github.com/user-attachments/assets/cafdab12-6d62-4a44-a736-8cd716085913)
+![Organigrmama server](https://github.com/user-attachments/assets/755e5ab9-2657-4e04-8afa-faa90c8830e9)
 
 ---
 
@@ -79,6 +84,8 @@ The Raspberry Pi hosts the IoT server, which includes the Mosquitto broker desig
 - **Node-RED:** Used to create nodes between the server and the database, providing a visual programming interface for IoT projects.
 - **Dashboard Creation:** Node-RED offers tools to create a Dashboard for accessing information and controlling the system.
 - **Firebase:** A real-time database from Google chosen for its ease of use and performance, facilitating communication between the server and the mobile app.
+![Node_red_flow](https://github.com/user-attachments/assets/7382a9ef-49e0-4d41-b218-e6f3cce32dff)
+![image](https://github.com/user-attachments/assets/e1c1f03b-8998-4b37-8b7d-51277f96f994)
 
 ---
 
@@ -90,6 +97,8 @@ I created a simple Android app using Flutter. Currently, the app supports:
 - 📊 Data visualization
 
 **Future Plans:** Improve the app to make it more interactive.
+![image](https://github.com/user-attachments/assets/20f99217-32ea-4a46-968a-26487c2ae43b)
+![image](https://github.com/user-attachments/assets/260a3db9-1ca8-4309-81da-f0e74d0cdd3b) 
 
 ---
 
