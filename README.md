@@ -24,7 +24,6 @@ The main box, which contains the MCU, sensors, and actuators, is equipped with t
 - 🌡️ Climate control information
 
 ![Main overview of the project](https://github.com/user-attachments/assets/c6cb7e32-e763-4e55-b984-941ef46d4a73 )
-![image](http://url.to/image.png]](http://url.to/image.png "Title" {width=40px height=400px})
 
 **Navigation:**
 
