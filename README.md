@@ -49,6 +49,8 @@ Communication with the IoT server is done via Wi-Fi using the MQTT (Message Queu
 - **Initial Connection:** The 'box' activates Bluetooth Low Energy (BLE) to scan for a device and receive network credentials.
 - **Mobile Phone Interaction:** Connect to the board using a mobile phone to transmit credentials. Once connected, data transfer occurs via Wi-Fi.
 - **Future Plans:** Integrate the BLE feature into the mobile app and create a mechanism to store connection data from previous sessions.
+![BLE_WIFI_DIAGRAM](https://github.com/user-attachments/assets/b2d7fd4a-d886-4f02-b6b0-83840afa9bc1)
+![mqtt_COM](https://github.com/user-attachments/assets/6974e211-5331-4a14-a869-99ff0a50eaf9)
 
 ---
 
