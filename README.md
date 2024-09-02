@@ -28,6 +28,9 @@ The main box, which contains the MCU, sensors, and actuators, is equipped with t
 - 📊 Sensor data
 - 🌡️ Climate control information
 
+For some of the testing that I made during project development, I used Wokwi.com for simulation of my project, down bellow is the link:
+https://wokwi.com/projects/396128726000384001
+
 <p align="center">
     <img src="https://github.com/user-attachments/assets/c6cb7e32-e763-4e55-b984-941ef46d4a73" alt="Main overview of the project" height="400"/>
 </p>
