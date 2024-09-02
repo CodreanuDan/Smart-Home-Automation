@@ -153,7 +153,7 @@ I created a simple Android app using Flutter. Currently, the app supports:
 <p align="center">
     <img src="https://github.com/user-attachments/assets/260a3db9-1ca8-4309-81da-f0e74d0cdd3b" alt="Mobile_App_2" height="400"/>
 </p>
-<p align="center"><em>Figure 14: Mobile App for Visualization</em></p>
+<p align="center"><em>Figure 14: Mobile App  Visualization</em></p>
 
 ---
 
