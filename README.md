@@ -86,6 +86,7 @@ Communication with the IoT server is done via Wi-Fi using the MQTT (Message Queu
 For the climate control system, I used a Peltier cell, which operates based on the thermoelectric effect, to create a heating/cooling unit.
 
 - **Control Mechanism:** The cell is controlled by an H-bridge that manages the current flow using two pairs of relays triggered by commands from a finite state machine for climate control.
+- **Simulation:** The simulation files are found in the folder H_Bridge_Simurelay and can be simulated using Simurelay: https://apps.microsoft.com/detail/9mwmfj4l40g1?hl=en-US&gl=US
 
 <p align="center">
     <img src="https://github.com/user-attachments/assets/c9afbe55-f0bc-4912-a40c-f86485e2c920" alt="Control_Racire" height="400"/>
