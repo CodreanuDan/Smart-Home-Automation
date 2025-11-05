@@ -34,6 +34,9 @@ https://wokwi.com/projects/396128726000384001
 <p align="center">
     <img src="https://github.com/user-attachments/assets/c6cb7e32-e763-4e55-b984-941ef46d4a73" alt="Main overview of the project" height="400"/>
 </p>
+<p align="center">
+    <img src="https://github.com/user-attachments/assets/348d1166-acb4-41f3-be8c-e5fe98b53483" alt="Inside the box" height="400"/>
+</p>
 <p align="center"><em>Figure 2: Overview of the Main Box Interface with LCD and OLED screens</em></p>
 
 **Navigation:**
@@ -164,3 +167,4 @@ I created a simple Android app using Flutter. Currently, the app supports:
 
 🎯 
 I hope you read this description and also hope you like what you saw. Thank you for your attention!
+
